@@ -1,30 +1,60 @@
 # Tower of Odds - Gimersia Edition
 
-**2D** Tower Defense game dengan wave system yang auto-scaling dan 3 tipe enemy (Melee, Ranged, Tank).
+**2D** Tower Defense game dengan **skill-based combat**, dice system, wave system yang auto-scaling dan 3 tipe enemy (Melee, Ranged, Tank).
 
 ---
 
 ## 🎮 Features
 
+- **🎲 Skill-Based Combat**: Tower tidak punya basic attack, semua damage dari skills!
+- **🎯 Dice Roll System**: Setiap attack roll 2d6 untuk damage multiplier (0.2x - 1.2x)
+- **⚔️ Multiple Skills**: Equip hingga 3 skills sekaligus, semua activate per attack cycle
 - **Auto-Scaling Wave System**: Difficulty meningkat otomatis berdasarkan wave
 - **3 Enemy Types**: Masing-masing dengan behavior unik
   - 🗡️ **Melee**: Fast & aggressive
   - 🏹 **Ranged**: Kiting & distance control
   - 🛡️ **Tank**: Slow & tanky
-- **Smart Tower AI**: Auto-targeting dengan prioritas jarak terdekat
+- **Smart Enemy Targeting**: Auto-targeting closest enemy dengan dynamic retargeting
 - **Pure Survival Mode**: No upgrades, pure skill-based gameplay
 - **2D Gameplay**: Top-down atau side-view perspective
 - **Balanced Gameplay**: Stats yang sudah di-balance untuk 20+ waves
 - **📊 Data-Driven Design**: Enemy stats menggunakan ScriptableObject (edit langsung di Inspector!)
-- **🎯 Projectile System**: Tower dan Ranged enemy menembakkan bullet dengan travel time
+- **🎯 Projectile System**: Tower skills dan Ranged enemy menembakkan bullet dengan travel time
 - **⭕ Circle Spawn**: Enemies spawn di tepi lingkaran dan bergerak ke tower
 
 ---
 
-## 📁 File Structure
+## 🆕 NEW: Skill System
+
+**Tower sekarang menggunakan sistem skill!** Tidak ada basic attack lagi.
+
+### Example Skills:
+- **DiceSkill**: Fires dice projectile (1-6 pips), hastens next attack based on roll
+- **MultiShotSkill**: Attack 3 closest enemies simultaneously
+
+### Cara Equip Skills:
+1. Create skill asset via: Create → Tower → Skills
+2. Configure skill properties di Inspector (damage, range, projectile)
+3. Drag skill ke TowerRuntime's Skill Slots (max 3 skills)
+4. All equipped skills activate setiap attack cycle!
+
+**� Read:** `INTEGRATION_GUIDE.md` untuk setup lengkap & `SKILL_QUICK_REFERENCE.md` untuk quick reference.
+
+---
+
+## �📁 File Structure
 
 ```
 Assets/
+├── Game/                        # 🆕 NEW: Skill-based tower system
+│   └── Tower/
+│       ├── TowerRuntime.cs      # Main tower with skill support
+│       ├── TowerBase.cs         # Stats & dice helpers
+│       └── Skills/
+│           ├── TowerSkill.cs       # Base class untuk skills
+│           ├── BasicAttackSkill.cs # Single target attack
+│           ├── DiceSkill.cs        # Dice variance skill
+│           └── MultiShotSkill.cs   # Multi-target skill
 ├── Scriptables/
 │   ├── EnemyData.cs             # ScriptableObject untuk enemy stats
 │   └── Enemies/
@@ -33,14 +63,14 @@ Assets/
 │       └── TankEnemyData.asset  # Tank stats (editable!)
 ├── Scripts/
 │   ├── Combat/
-│   │   └── Projectile.cs        # Bullet travel & damage
+│   │   └── Projectile.cs        # Bullet travel & damage (supports both tower systems)
 │   ├── Enemies/
 │   │   ├── BaseEnemy.cs         # Base class (uses EnemyData)
 │   │   ├── MeleeEnemy.cs        # Fast attacker
 │   │   ├── RangedEnemy.cs       # Distance fighter
 │   │   └── TankEnemy.cs         # Heavy hitter
 │   ├── Tower/
-│   │   └── Tower.cs             # Tower dengan projectile system
+│   │   └── Tower.cs             # 🔄 OLD tower system (legacy)
 │   └── Manager/
 │       ├── GameManager.cs       # Game state management
 │       ├── WaveManager.cs       # Wave scaling system
@@ -50,9 +80,14 @@ Assets/
 
 ---
 
-## � Documentation
+## 📚 Documentation
 
-- **[SETUP_SCRIPTABLEOBJECT.md](SETUP_SCRIPTABLEOBJECT.md)** - 🛠️ **BACA INI DULU!** Step-by-step setup ScriptableObject
+### 🆕 NEW: Skill System Guides
+- **[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)** - 🔗 **Integration TowerRuntime + Enemy System** (READ THIS FIRST!)
+- **[SKILL_QUICK_REFERENCE.md](SKILL_QUICK_REFERENCE.md)** - ⚡ Quick reference untuk create skills
+
+### Enemy & Data System
+- **[SETUP_SCRIPTABLEOBJECT.md](SETUP_SCRIPTABLEOBJECT.md)** - 🛠️ Step-by-step setup ScriptableObject
 - **[VISUAL_SETUP_GUIDE.md](VISUAL_SETUP_GUIDE.md)** - 🎨 Visual diagrams & flow setup
 - **[ENEMY_DATA_GUIDE.md](ENEMY_DATA_GUIDE.md)** - 📊 Cara pakai EnemyData system
 - **[BALANCING_REFERENCE.md](BALANCING_REFERENCE.md)** - ⚖️ Stats reference & balancing
@@ -60,19 +95,43 @@ Assets/
 
 ---
 
-## �🚀 Quick Setup
+## 🚀 Quick Setup (NEW Skill System)
 
-**⚠️ IMPORTANT:** Baca **[SETUP_SCRIPTABLEOBJECT.md](SETUP_SCRIPTABLEOBJECT.md)** terlebih dahulu untuk setup EnemyData assets!
+**⚠️ IMPORTANT:** Baca **[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)** untuk setup lengkap skill system!
 
 ### 1. Scene Setup
 
-1. **Create Tower**
+1. **Create Tower (NEW System)**
    - Create Empty GameObject, name: "Tower"
    - Set Tag: "Tower"
-   - Add Component: `Tower.cs`
+   - Add Component: `TowerRuntime.cs` (bukan Tower.cs lama!)
    - Position: (0, 0, 0) atau di center map
+   - Configure stats di Inspector:
+     - Max HP: 100
+     - Armor: 5
+     - HP Regen Per Sec: 1
+     - Attack Speed: 1.0
+     - Attack Cooldown: 0.5
 
-2. **Create Managers**
+2. **Create Skill Assets**
+   - Right-click in Project → Create → Tower → Skills
+   - Create DiceSkill (dice variance + tempo)
+   - Create MultiShotSkill (multi-target) - optional
+   - Configure each skill:
+     - Base Damage
+     - Attack Range (default: 15)
+     - Projectile Prefab (drag existing projectile)
+     - Projectile Speed (default: 20)
+
+3. **Equip Skills to Tower**
+   - Select TowerRuntime GameObject
+   - In Inspector, set Skill Slots size = 3
+   - Drag skill assets ke slots:
+     - Slot 0: DiceSkill
+     - Slot 1: MultiShotSkill (optional)
+     - Slot 2: (empty or custom skill)
+
+4. **Create Managers**
    - Create Empty GameObject, name: "GameManager"
    - Add Component: `GameManager.cs`
    
@@ -80,48 +139,14 @@ Assets/
    - Add Component: `WaveManager.cs`
    - Add Component: `EnemySpawner.cs`
 
-3. **Create Enemy Prefabs (2D)**
-   
-   **Melee Enemy Prefab:**
-   - Create 2D Object (Sprite), name: "MeleeEnemy"
-   - Add Component: `SpriteRenderer` (Color: Red)
-   - Add Component: `MeleeEnemy.cs`
-   - Scale: (0.5, 0.5, 1) untuk 2D
-   - Add `CircleCollider2D` atau `BoxCollider2D` (optional)
-   - Drag ke Prefabs folder
-   
-   **Ranged Enemy Prefab:**
-   - Create 2D Object (Sprite), name: "RangedEnemy"
-   - Add Component: `SpriteRenderer` (Color: Blue)
-   - Add Component: `RangedEnemy.cs`
-   - Scale: (0.4, 0.4, 1)
-   - Add `CircleCollider2D` atau `BoxCollider2D` (optional)
-   - Drag ke Prefabs folder
-   
-   **Tank Enemy Prefab:**
-   - Create 2D Object (Sprite), name: "TankEnemy"
-   - Add Component: `SpriteRenderer` (Color: Gray)
-   - Add Component: `TankEnemy.cs`
-   - Scale: (0.8, 0.8, 1)
-   - Add `CircleCollider2D` atau `BoxCollider2D` (optional)
-   - Drag ke Prefabs folder
-   
-   **Tower (2D):**
-   - Create 2D Object (Sprite), name: "Tower"
-   - Add Component: `SpriteRenderer` (Color: Green)
-   - Set Tag: "Tower"
-   - Add Component: `Tower.cs`
-   - Position: (0, 0, 0)
-   - Scale: (1, 1, 1)
+5. **Create Enemy Prefabs & Assign** (sama seperti sebelumnya)
+   - Follow enemy creation dari dokumentasi lama
+   - OR baca **[SETUP_SCRIPTABLEOBJECT.md](SETUP_SCRIPTABLEOBJECT.md)** untuk detail
 
-4. **Assign Prefabs**
-   - Select "WaveManager" GameObject
-   - Di Inspector, pada `EnemySpawner` component:
-     - Assign "MeleeEnemy" ke `Melee Prefab`
-     - Assign "RangedEnemy" ke `Ranged Prefab`
-     - Assign "TankEnemy" ke `Tank Prefab`
-
-5. **Press Play!** 🎉
+6. **Press Play!** 🎉
+   - Watch tower auto-attack via skills
+   - Check console untuk damage logs
+   - Observe dice rolls affecting damage
 
 ---
 

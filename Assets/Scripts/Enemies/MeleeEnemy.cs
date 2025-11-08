@@ -11,18 +11,16 @@ namespace TowerOfOdds.Enemies
         // Semua stats sekarang di-load dari EnemyData ScriptableObject
         // Tidak perlu hardcode lagi di sini
 
-        protected override void Attack()
+    protected override void Attack()
+    {
+        // Melee attack - direct damage to tower
+        TowerRuntime towerComponent = tower?.GetComponent<TowerRuntime>();
+        if (towerComponent != null)
         {
-            // Melee attack - direct damage to tower
-            Tower.Tower towerComponent = tower?.GetComponent<Tower.Tower>();
-            if (towerComponent != null)
-            {
-                towerComponent.TakeDamage(attackDamage);
-                Debug.Log($"Melee Enemy attacks tower for {attackDamage} damage!");
-            }
+            towerComponent.ApplyDamage(attackDamage);
+            Debug.Log($"Melee Enemy attacks tower for {attackDamage} damage!");
         }
-
-        protected override void MovementBehavior()
+    }        protected override void MovementBehavior()
         {
             // Melee enemies move straight to tower aggressively
             base.MovementBehavior();

@@ -118,17 +118,15 @@ namespace TowerOfOdds.Enemies
             }
         }
 
-        protected virtual void Attack()
+    protected virtual void Attack()
+    {
+        TowerRuntime towerComponent = tower.GetComponent<TowerRuntime>();
+        if (towerComponent != null)
         {
-            Tower.Tower towerComponent = tower.GetComponent<Tower.Tower>();
-            if (towerComponent != null)
-            {
-                towerComponent.TakeDamage(attackDamage);
-                Debug.Log($"{enemyType} enemy attacked tower for {attackDamage} damage!");
-            }
+            towerComponent.ApplyDamage(attackDamage);
+            Debug.Log($"{enemyType} enemy attacked tower for {attackDamage} damage!");
         }
-
-        public virtual void TakeDamage(float damage)
+    }        public virtual void TakeDamage(float damage)
         {
             if (!isAlive) return;
 

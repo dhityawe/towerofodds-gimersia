@@ -5,12 +5,13 @@ namespace TowerOfOdds.Combat
     /// <summary>
     /// Simple projectile that moves towards a target transform (2D) and applies damage on arrival.
     /// This implementation does a distance check and does not rely on Unity physics so it's easy to wire up.
+    /// Updated to support both old Tower and new TowerRuntime systems.
     /// </summary>
     public class Projectile : MonoBehaviour
     {
         private Transform target;
-        private float speed = 10f;
-        private float damage = 1f;
+        private float speed = 0f;
+        private float damage = 0f;
         private bool targetIsTower = false;
 
         public void Init(Transform targetTransform, float damageAmount, float travelSpeed, bool isTargetTower)
@@ -41,10 +42,21 @@ namespace TowerOfOdds.Combat
             {
                 if (targetIsTower)
                 {
-                    Tower.Tower tower = target.GetComponent<Tower.Tower>();
-                    if (tower != null)
+                    // Try new tower system first
+                    TowerRuntime newTower = target.GetComponent<TowerRuntime>();
+                    if (newTower != null)
                     {
-                        tower.TakeDamage(damage);
+                        newTower.ApplyDamage(damage);
+                    }
+                    else
+                    {
+                        // Fallback to old tower via reflection (to avoid compile errors)
+                        var oldTower = target.GetComponent("Tower");
+                        if (oldTower != null)
+                        {
+                            var takeDamageMethod = oldTower.GetType().GetMethod("TakeDamage");
+                            takeDamageMethod?.Invoke(oldTower, new object[] { damage });
+                        }
                     }
                 }
                 else

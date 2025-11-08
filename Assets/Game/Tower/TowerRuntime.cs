@@ -105,18 +105,119 @@ public class TowerRuntime : MonoBehaviour
 
     private void DoAttack()
     {
-        // Example roll (replace with your Preparation Phase dice result)
+        Debug.Log($"[TowerRuntime] DoAttack() called at {Time.time:F2} | Tower: {gameObject.name}");
+        
+        // Roll dice once per attack cycle
         int d1 = UnityEngine.Random.Range(1, 7);
         int d2 = UnityEngine.Random.Range(1, 7);
 
-        // Activate all equipped skills
+        // Count equipped skills
+        int equippedCount = 0;
         for (int i = 0; i < skillSlots.Length; i++)
         {
             if (skillSlots[i] != null)
             {
+                equippedCount++;
+                Debug.Log($"[TowerRuntime] Slot {i} has skill: {skillSlots[i].skillName}");
+            }
+        }
+        Debug.Log($"[TowerRuntime] Total equipped skills: {equippedCount} | BaseAttackCount: {currentStats.BaseAttackCount}");
+
+        // Activate all equipped skills (BaseAttackCount not used in this version)
+        // For multi-attack, wrap this in a loop: for(int n = 0; n < BaseAttackCount; n++)
+        for (int i = 0; i < skillSlots.Length; i++)
+        {
+            if (skillSlots[i] != null)
+            {
+                Debug.Log($"[TowerRuntime] Activating slot {i}: {skillSlots[i].skillName}");
                 skillSlots[i].Activate(this, i, d1, d2);
             }
         }
+        Debug.Log($"[TowerRuntime] DoAttack() COMPLETE");
+    }
+
+    // ====== Enemy Targeting Helpers (Integration with old enemy system) ======
+    
+    /// <summary>
+    /// Find the closest alive enemy within range.
+    /// Returns null if no enemy in range.
+    /// </summary>
+    public TowerOfOdds.Enemies.BaseEnemy FindClosestEnemy(float range = 15f)
+    {
+        var allEnemies = UnityEngine.Object.FindObjectsByType<TowerOfOdds.Enemies.BaseEnemy>(FindObjectsSortMode.None);
+        
+        TowerOfOdds.Enemies.BaseEnemy closest = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (var enemy in allEnemies)
+        {
+            if (!enemy.IsAlive) continue;
+
+            float distance = Vector3.Distance(transform.position, enemy.GetPosition());
+            if (distance <= range && distance < closestDistance)
+            {
+                closest = enemy;
+                closestDistance = distance;
+            }
+        }
+
+        return closest;
+    }
+
+    /// <summary>
+    /// Find multiple closest enemies within range, sorted by distance.
+    /// </summary>
+    public TowerOfOdds.Enemies.BaseEnemy[] FindClosestEnemies(int count, float range = 15f)
+    {
+        var allEnemies = UnityEngine.Object.FindObjectsByType<TowerOfOdds.Enemies.BaseEnemy>(FindObjectsSortMode.None);
+        
+        var enemiesInRange = new System.Collections.Generic.List<(TowerOfOdds.Enemies.BaseEnemy enemy, float distance)>();
+
+        foreach (var enemy in allEnemies)
+        {
+            if (!enemy.IsAlive) continue;
+
+            float distance = Vector3.Distance(transform.position, enemy.GetPosition());
+            if (distance <= range)
+            {
+                enemiesInRange.Add((enemy, distance));
+            }
+        }
+
+        // Sort by distance
+        enemiesInRange.Sort((a, b) => a.distance.CompareTo(b.distance));
+
+        // Take top N
+        int resultCount = Mathf.Min(count, enemiesInRange.Count);
+        var result = new TowerOfOdds.Enemies.BaseEnemy[resultCount];
+        for (int i = 0; i < resultCount; i++)
+        {
+            result[i] = enemiesInRange[i].enemy;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Get all alive enemies within range.
+    /// </summary>
+    public TowerOfOdds.Enemies.BaseEnemy[] GetAllEnemiesInRange(float range = 15f)
+    {
+        var allEnemies = UnityEngine.Object.FindObjectsByType<TowerOfOdds.Enemies.BaseEnemy>(FindObjectsSortMode.None);
+        var result = new System.Collections.Generic.List<TowerOfOdds.Enemies.BaseEnemy>();
+
+        foreach (var enemy in allEnemies)
+        {
+            if (!enemy.IsAlive) continue;
+
+            float distance = Vector3.Distance(transform.position, enemy.GetPosition());
+            if (distance <= range)
+            {
+                result.Add(enemy);
+            }
+        }
+
+        return result.ToArray();
     }
 
     // ====== Instance API ======
@@ -173,6 +274,55 @@ public class TowerRuntime : MonoBehaviour
     {
         mult = Mathf.Max(0.01f, mult);
         currentStats.AttackSpeed = Mathf.Max(0.01f, currentStats.AttackSpeed * mult);
+    }
+
+    // ====== Temporary Buff System ======
+    
+    private Coroutine activeSpeedBuffCoroutine;
+    
+    /// <summary>
+    /// Temporarily reduce AttackSpeed cooldown by the specified amount.
+    /// Clamps to minAttackSpeed, then restores after duration.
+    /// Used by DiceSkill to hasten next attack.
+    /// </summary>
+    public void ReduceAttackSpeedTemporarily(float reduction, float duration, float minAttackSpeed = 0.15f)
+    {
+        // Cancel previous buff if still active
+        if (activeSpeedBuffCoroutine != null)
+        {
+            StopCoroutine(activeSpeedBuffCoroutine);
+        }
+        
+        activeSpeedBuffCoroutine = StartCoroutine(ApplyTemporarySpeedBuff(reduction, duration, minAttackSpeed));
+    }
+    
+    private System.Collections.IEnumerator ApplyTemporarySpeedBuff(float reduction, float duration, float minAttackSpeed)
+    {
+        // Store original attack speed
+        float originalSpeed = currentStats.AttackSpeed;
+        
+        // Calculate current cooldown (time between attacks)
+        float currentCooldown = 1f / originalSpeed;
+        
+        // Reduce cooldown by specified amount
+        float newCooldown = Mathf.Max(minAttackSpeed, currentCooldown - reduction);
+        
+        // Convert back to attack speed (attacks per second)
+        float newSpeed = 1f / newCooldown;
+        
+        currentStats.AttackSpeed = newSpeed;
+        
+        Debug.Log($"[TowerRuntime] Speed buff active: {currentCooldown:F3}s → {newCooldown:F3}s cooldown ({originalSpeed:F2} → {newSpeed:F2} attacks/sec) for {duration}s");
+        
+        // Wait for duration
+        yield return new WaitForSeconds(duration);
+        
+        // Restore original speed
+        currentStats.AttackSpeed = originalSpeed;
+        
+        Debug.Log($"[TowerRuntime] Speed buff expired: restored to {currentCooldown:F3}s cooldown ({originalSpeed:F2} attacks/sec)");
+        
+        activeSpeedBuffCoroutine = null;
     }
 
     // ====== Skill Slot Management ======

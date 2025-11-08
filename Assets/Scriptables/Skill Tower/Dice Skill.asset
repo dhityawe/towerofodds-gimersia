@@ -9,19 +9,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec213ed91810d6547b5b5428b8ba1096, type: 3}
-  m_Name: TankEnemyData
+  m_Script: {fileID: 11500000, guid: 413a0337c36c0314a842e7f332796f1c, type: 3}
+  m_Name: Dice Skill
   m_EditorClassIdentifier: 
-  enemyType: 2
-  enemyName: Tank
-  description: 
-  maxHealth: 125
-  attackDamage: 25
-  attackRange: 1.5
-  attackCooldown: 2
-  moveSpeed: 0.7
-  preferredDistance: 1
-  damageReduction: 0.202
+  skillName: Dice Skill
+  description: Skill description here...
+  icon: {fileID: 0}
+  cost: 100
+  rarity: 0
+  baseDamage: 15
+  speedUpPerRoll: 0.03
+  buffDuration: 0.75
+  attackRange: 5
   projectilePrefab: {fileID: 2613932928995288591, guid: 88ff338d02f5f574c8e9df4af4378225, type: 3}
-  projectileSpeed: 8
-  enemyColor: {r: 0.5377358, g: 0.5377358, b: 0.5377358, a: 1}
+  projectileSpeed: 15

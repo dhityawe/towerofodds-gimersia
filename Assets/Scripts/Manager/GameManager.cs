@@ -14,14 +14,12 @@ namespace TowerOfOdds.Manager
 
     public class GameManager : MonoBehaviour
     {
-        [Header("Game State")]
-        [SerializeField] private GameState currentState = GameState.Playing;
+    [Header("Game State")]
+    [SerializeField] private GameState currentState = GameState.Playing;
 
-        [Header("References")]
-        [SerializeField] private Tower.Tower tower;
-        [SerializeField] private WaveManager waveManager;
-
-        [Header("Game Stats")]
+    [Header("References")]
+    [SerializeField] private TowerRuntime tower;
+    [SerializeField] private WaveManager waveManager;        [Header("Game Stats")]
         [SerializeField] private int enemiesKilled;
         [SerializeField] private int highestWave;
         [SerializeField] private float playTime;
@@ -66,21 +64,19 @@ namespace TowerOfOdds.Manager
             }
         }
 
-        private void InitializeGame()
+    private void InitializeGame()
+    {
+        // Find tower if not assigned
+        if (tower == null)
         {
-            // Find tower if not assigned
-            if (tower == null)
-            {
-                tower = Object.FindFirstObjectByType<Tower.Tower>();
-            }
+            tower = Object.FindFirstObjectByType<TowerRuntime>();
+        }
 
-            // Find wave manager if not assigned
-            if (waveManager == null)
-            {
-                waveManager = Object.FindFirstObjectByType<WaveManager>();
-            }
-
-            // Subscribe to events
+        // Find wave manager if not assigned
+        if (waveManager == null)
+        {
+            waveManager = Object.FindFirstObjectByType<WaveManager>();
+        }            // Subscribe to events
             if (waveManager != null)
             {
                 waveManager.OnWaveStart += OnWaveStarted;

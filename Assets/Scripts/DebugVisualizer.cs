@@ -8,45 +8,43 @@ namespace TowerOfOdds.Utilities
     /// </summary>
     public class DebugVisualizer : MonoBehaviour
     {
-        [SerializeField] private bool showHealthBar = true;
-        [SerializeField] private bool showRange = true;
-        [SerializeField] private Color healthBarColor = Color.green;
-        [SerializeField] private Color rangeColor = Color.red;
+    [SerializeField] private bool showHealthBar = true;
+    [SerializeField] private bool showRange = true;
+    [SerializeField] private Color healthBarColor = Color.green;
+    [SerializeField] private Color rangeColor = Color.red;
 
-        private Enemies.BaseEnemy enemy;
-        private Tower.Tower tower;
+    private Enemies.BaseEnemy enemy;
+    private TowerRuntime tower;
 
-        private void Start()
+    private void Start()
+    {
+        enemy = GetComponent<Enemies.BaseEnemy>();
+        tower = GetComponent<TowerRuntime>();
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (showHealthBar)
         {
-            enemy = GetComponent<Enemies.BaseEnemy>();
-            tower = GetComponent<Tower.Tower>();
+            DrawHealthBar();
         }
+    }
 
-        private void OnDrawGizmos()
+    private void DrawHealthBar()
+    {
+        float currentHealth = 0;
+        float maxHealth = 1;
+
+        if (enemy != null)
         {
-            if (showHealthBar)
-            {
-                DrawHealthBar();
-            }
+            currentHealth = enemy.GetCurrentHealth();
+            maxHealth = enemy.GetMaxHealth();
         }
-
-        private void DrawHealthBar()
+        else if (tower != null)
         {
-            float currentHealth = 0;
-            float maxHealth = 1;
-
-            if (enemy != null)
-            {
-                currentHealth = enemy.GetCurrentHealth();
-                maxHealth = enemy.GetMaxHealth();
-            }
-            else if (tower != null)
-            {
-                currentHealth = tower.CurrentHealth;
-                maxHealth = tower.MaxHealth;
-            }
-
-            if (maxHealth <= 0) return;
+            currentHealth = tower.GetCurrentHp();
+            maxHealth = tower.GetStats().MaxHp;
+        }            if (maxHealth <= 0) return;
 
             float healthPercent = currentHealth / maxHealth;
             Vector3 position = transform.position + Vector3.up * 2f;

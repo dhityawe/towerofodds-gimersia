@@ -27,50 +27,48 @@ namespace TowerOfOdds.UI
         [Header("Wave Timer")]
         [SerializeField] private TextMeshProUGUI nextWaveTimerText;
 
-        private Manager.GameManager gameManager;
-        private Manager.WaveManager waveManager;
-        private Tower.Tower tower;
+    private Manager.GameManager gameManager;
+    private Manager.WaveManager waveManager;
+    private TowerRuntime tower;
 
-        private void Start()
+    private void Start()
+    {
+        // Find references
+        gameManager = Manager.GameManager.Instance;
+        waveManager = Object.FindFirstObjectByType<Manager.WaveManager>();
+        tower = Object.FindFirstObjectByType<TowerRuntime>();
+
+        if (gameManager == null)
+            Debug.LogWarning("GameManager not found!");
+        if (waveManager == null)
+            Debug.LogWarning("WaveManager not found!");
+        if (tower == null)
+            Debug.LogWarning("Tower not found!");
+    }
+
+    private void Update()
+    {
+        UpdateTowerInfo();
+        UpdateWaveInfo();
+        UpdateGameStats();
+        UpdateNextWaveTimer();
+    }
+
+    private void UpdateTowerInfo()
+    {
+        if (tower == null) return;
+
+        if (towerHealthText != null)
         {
-            // Find references
-            gameManager = Manager.GameManager.Instance;
-            waveManager = Object.FindFirstObjectByType<Manager.WaveManager>();
-            tower = Object.FindFirstObjectByType<Tower.Tower>();
-
-            if (gameManager == null)
-                Debug.LogWarning("GameManager not found!");
-            if (waveManager == null)
-                Debug.LogWarning("WaveManager not found!");
-            if (tower == null)
-                Debug.LogWarning("Tower not found!");
+            towerHealthText.text = $"HP: {tower.GetCurrentHp():F0} / {tower.GetStats().MaxHp:F0}";
         }
 
-        private void Update()
+        if (towerHealthBar != null)
         {
-            UpdateTowerInfo();
-            UpdateWaveInfo();
-            UpdateGameStats();
-            UpdateNextWaveTimer();
+            towerHealthBar.maxValue = tower.GetStats().MaxHp;
+            towerHealthBar.value = tower.GetCurrentHp();
         }
-
-        private void UpdateTowerInfo()
-        {
-            if (tower == null) return;
-
-            if (towerHealthText != null)
-            {
-                towerHealthText.text = $"HP: {tower.CurrentHealth:F0} / {tower.MaxHealth:F0}";
-            }
-
-            if (towerHealthBar != null)
-            {
-                towerHealthBar.maxValue = tower.MaxHealth;
-                towerHealthBar.value = tower.CurrentHealth;
-            }
-        }
-
-        private void UpdateWaveInfo()
+    }        private void UpdateWaveInfo()
         {
             if (waveManager == null) return;
 

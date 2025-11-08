@@ -77,10 +77,10 @@ namespace TowerOfOdds.Enemies
             }
             else
             {
-                Tower.Tower towerComponent = tower?.GetComponent<Tower.Tower>();
+                TowerRuntime towerComponent = tower?.GetComponent<TowerRuntime>();
                 if (towerComponent != null)
                 {
-                    towerComponent.TakeDamage(attackDamage);
+                    towerComponent.ApplyDamage(attackDamage);
                 }
             }
 

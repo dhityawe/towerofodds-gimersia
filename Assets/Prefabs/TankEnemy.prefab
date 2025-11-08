@@ -108,7 +108,7 @@ MonoBehaviour:
   attackDamage: 0
   attackRange: 0
   attackCooldown: 0
-  enemyType: 0
+  enemyType: 2
 --- !u!61 &7873838941726863385
 BoxCollider2D:
   m_ObjectHideFlags: 0

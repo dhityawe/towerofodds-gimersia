@@ -9,22 +9,20 @@ namespace TowerOfOdds.Utilities
     /// </summary>
     public class DebugCheatCodes : MonoBehaviour
     {
-        [Header("Cheat Settings")]
-        [SerializeField] private bool enableCheats = true;
-        // [SerializeField] private float currencyCheatAmount = 1000f; // Disabled
-        [SerializeField] private float healAmount = 500f;
+    [Header("Cheat Settings")]
+    [SerializeField] private bool enableCheats = true;
+    // [SerializeField] private float currencyCheatAmount = 1000f; // Disabled
+    [SerializeField] private float healAmount = 500f;
 
-        private Manager.GameManager gameManager;
-        private Manager.WaveManager waveManager;
-        private Tower.Tower tower;
+    private Manager.GameManager gameManager;
+    private Manager.WaveManager waveManager;
+    private TowerRuntime tower;
 
-        private void Start()
-        {
-            gameManager = Manager.GameManager.Instance;
-            waveManager = Object.FindFirstObjectByType<Manager.WaveManager>();
-            tower = Object.FindFirstObjectByType<Tower.Tower>();
-
-            if (enableCheats)
+    private void Start()
+    {
+        gameManager = Manager.GameManager.Instance;
+        waveManager = Object.FindFirstObjectByType<Manager.WaveManager>();
+        tower = Object.FindFirstObjectByType<TowerRuntime>();            if (enableCheats)
             {
                 Debug.Log("=== CHEAT CODES ENABLED ===");
                 // Debug.Log("M - Add Currency (+1000)"); // Disabled
@@ -161,8 +159,8 @@ namespace TowerOfOdds.Utilities
             // Make tower invincible
             if (tower != null)
             {
-                // This is a simple implementation - you might want to add a flag in Tower.cs
-                tower.UpgradeMaxHealth(999999f);
+                tower.AddMaxHp(999999f);
+                tower.Heal(999999f);
                 Debug.Log("CHEAT: God Mode - Tower health set to max");
             }
         }
@@ -180,7 +178,7 @@ namespace TowerOfOdds.Utilities
                              // $"Currency: {gameManager?.Currency:F0}\n" + // Disabled
                              $"Wave: {waveManager?.CurrentWave}\n" +
                              $"Kills: {gameManager?.EnemiesKilled}\n" +
-                             $"Tower HP: {tower?.CurrentHealth:F0}/{tower?.MaxHealth:F0}";
+                             $"Tower HP: {tower?.GetCurrentHp():F0}/{tower?.GetStats().MaxHp:F0}";
 
             GUI.Label(new Rect(10, 10, 300, 100), cheatInfo, style);
         }
