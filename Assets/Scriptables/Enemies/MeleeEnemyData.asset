@@ -24,4 +24,4 @@ MonoBehaviour:
   damageReduction: 0
   projectilePrefab: {fileID: 0}
   projectileSpeed: 15
-  enemyColor: {r: 1, g: 1, b: 1, a: 1}
+  enemyColor: {r: 1, g: 0, b: 0.34424305, a: 1}
