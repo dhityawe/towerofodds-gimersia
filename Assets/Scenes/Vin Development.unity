@@ -315,7 +315,7 @@ MonoBehaviour:
   rangedPrefab: {fileID: 6300764718220684289, guid: ecc53d643ecb42a4dba3fe038237ff45, type: 3}
   tankPrefab: {fileID: 468263671476095767, guid: b05c71c223f87f242ad9ee226f37d251, type: 3}
   spawnPoints: []
-  spawnRadius: 4.64
+  spawnRadius: 3.8
   useRandomSpawnPoints: 1
   enemiesSpawned: 0
   targetEnemyCount: 0
@@ -334,6 +334,81 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &377598434
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 377598435}
+  - component: {fileID: 377598437}
+  - component: {fileID: 377598436}
+  m_Layer: 5
+  m_Name: Overlay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &377598435
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 377598434}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 4, y: 4, z: 4}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 2074635280}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 332, y: 270}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &377598436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 377598434}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: -1068152042312246024, guid: 6b915d8249f20a8499f874dc6cfc46e6, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &377598437
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 377598434}
+  m_CullTransparentMesh: 1
 --- !u!1 &411764397
 GameObject:
   m_ObjectHideFlags: 0
@@ -630,18 +705,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3f0d02c1ffec7149a16aa482f9b6c1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1000
-  currentHealth: 0
-  attackDamage: 25
-  attackRange: 3.2
-  attackCooldown: 0.5
-  enemyLayer:
-    m_Bits: 0
-  currentTarget: {fileID: 0}
-  lastAttackTime: 0
-  projectilePrefab: {fileID: 2613932928995288591, guid: 88ff338d02f5f574c8e9df4af4378225, type: 3}
-  projectileSpeed: 20
-  isAlive: 1
 --- !u!212 &1273134367
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -748,9 +811,9 @@ MonoBehaviour:
   baseAttackCount: 1
   baseAttackSpeed: 1
   skillSlots:
-  - {fileID: 11400000, guid: 3ebf3d48d4d7b2b459fdeed0d3a86359, type: 2}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: f91cb77021d6c594e845d12dbd64cfa6, type: 2}
+  - {fileID: 11400000, guid: 96a8ea6329884f54ba807d930fa87f54, type: 2}
+  - {fileID: 11400000, guid: 1b786ba1ed126cf46ab4eff88799c3ba, type: 2}
   currentHp: 0
   isDead: 0
 --- !u!212 &1378166494
@@ -798,7 +861,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.41037738, b: 0.41037738, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -889,7 +952,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1755868717
 RectTransform:
   m_ObjectHideFlags: 0
@@ -906,8 +969,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 637.03, y: 362.1}
+  m_AnchoredPosition: {x: -16.699951, y: 21.300037}
+  m_SizeDelta: {x: -859.60004, y: 129.00008}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1755868718
 MonoBehaviour:
@@ -1231,6 +1294,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1755868717}
+  - {fileID: 377598435}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}

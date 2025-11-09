@@ -10,9 +10,9 @@ namespace TowerOfOdds.Combat
     public class Projectile : MonoBehaviour
     {
         private Transform target;
-        private float speed = 0f;
-        private float damage = 0f;
-        private bool targetIsTower = false;
+        private float speed;
+        private float damage;
+        private bool targetIsTower;
 
         public void Init(Transform targetTransform, float damageAmount, float travelSpeed, bool isTargetTower)
         {

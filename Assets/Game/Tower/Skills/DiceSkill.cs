@@ -32,14 +32,14 @@ public class DiceSkill : TowerSkill
             return;
         }
 
-        // Roll a single die (1-6) for damage variance - R ∈ {1..6}
-        int R = Random.Range(1, 7);
+        // Roll a single die (1-6) for damage variance (pip count)
+        int pipRoll = Random.Range(1, 7);
         
-        // Get dice multiplier from tower's dice system - M
-        float M = TowerBase.GetDiceMultiplier(diceRoll1, diceRoll2);
+        // Get dice multiplier from tower's dice system (2d6)
+        float towerDiceMultiplier = TowerBase.GetDiceMultiplier(diceRoll1, diceRoll2);
         
-        // Calculate damage: BaseDamage * M * R
-        float damage = baseDamage * M * R;
+        // Calculate damage: BaseDamage * towerDiceMultiplier * pipRoll
+        float damage = baseDamage * towerDiceMultiplier * pipRoll;
 
         // Spawn dice projectile with calculated damage
         if (projectilePrefab != null)
@@ -53,10 +53,10 @@ public class DiceSkill : TowerSkill
                 projectile.Init(target.transform, damage, projectileSpeed, false);
                 
                 // Apply speed-up buff after hit
-                // Reduce AttackSpeed by (0.03 * R) for 0.75s, clamped to minimum 0.15s
-                ApplySpeedUpBuff(tower, R);
+                // Reduce AttackSpeed by (0.03 * pipRoll) for 0.75s, clamped to minimum 0.15s
+                ApplySpeedUpBuff(tower, pipRoll);
                 
-                Debug.Log($"[Dice] PROJECTILE SPAWNED | Roll: {R} | M: {M:F2} | Damage: {damage:F1} | Speed buff: -{speedUpPerRoll * R:F2}s for {buffDuration}s | Target: {target.name}");
+                Debug.Log($"[Dice] PROJECTILE SPAWNED | Pip Roll: {pipRoll} | Tower Multiplier: {towerDiceMultiplier:F2} | Damage: {damage:F1} | Speed buff: -{speedUpPerRoll * pipRoll:F2}s for {buffDuration}s | Target: {target.name}");
             }
             else
             {
@@ -68,15 +68,15 @@ public class DiceSkill : TowerSkill
         {
             // Direct damage fallback
             target.TakeDamage(damage);
-            ApplySpeedUpBuff(tower, R);
+            ApplySpeedUpBuff(tower, pipRoll);
             Debug.Log($"[Dice] Direct hit: {damage:F1} | Speed buff applied (no projectile)");
         }
     }
 
-    private void ApplySpeedUpBuff(TowerRuntime tower, int rollValue)
+    private void ApplySpeedUpBuff(TowerRuntime tower, int pipValue)
     {
-        // Calculate speed reduction: 0.03 * R (this is cooldown reduction in seconds)
-        float cooldownReduction = speedUpPerRoll * rollValue;
+        // Calculate speed reduction: 0.03 * pipValue (this is cooldown reduction in seconds)
+        float cooldownReduction = speedUpPerRoll * pipValue;
         
         // Apply temporary speed buff
         // Reduce AttackSpeed cooldown by 'cooldownReduction' for 'buffDuration' seconds

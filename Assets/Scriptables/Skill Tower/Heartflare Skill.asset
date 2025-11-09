@@ -9,17 +9,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 413a0337c36c0314a842e7f332796f1c, type: 3}
-  m_Name: Dice Skill
+  m_Script: {fileID: 11500000, guid: aba6edcde2505154784b5d801a572bd6, type: 3}
+  m_Name: Heartflare Skill
   m_EditorClassIdentifier: 
-  skillName: Dice Skill
+  skillName: Heartflare Skill
   description: Skill description here...
   icon: {fileID: 0}
   cost: 100
   rarity: 0
-  baseDamage: 15
-  speedUpPerRoll: 0.03
-  buffDuration: 0.75
-  attackRange: 5
-  projectilePrefab: {fileID: 2613932928995288591, guid: 88ff338d02f5f574c8e9df4af4378225, type: 3}
-  projectileSpeed: 10
+  baseDamage: 20
+  maxRadius: 3
+  minRadius: 0.8
+  pulseDuration: 0.8
+  pulsePrefab: {fileID: 1200749732173133902, guid: 1f1420e8839d1a14cb3b5a1bcbb6a5df, type: 3}
+  pulseColor: {r: 1, g: 1, b: 1, a: 1}
+  skillCooldown: 2

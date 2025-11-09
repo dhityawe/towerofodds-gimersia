@@ -42,12 +42,16 @@ public static class TowerBase
     );
 
     // ====== DICE & DAMAGE RULES (stateless helpers) ======
-    /// <summary>Your unified per-wave dice rule. Example: (d1 + d2) / 10f.</summary>
-    public static float GetDiceMultiplier(int d1, int d2)
+    /// <summary>
+    /// Calculate tower dice multiplier from 2d6 roll.
+    /// Formula: (dice1 + dice2) / 10f
+    /// Range: 0.2 (snake eyes 1+1) to 1.2 (boxcars 6+6)
+    /// </summary>
+    public static float GetDiceMultiplier(int dice1, int dice2)
     {
         // Clamp dice to 1..6 for safety
-        d1 = Mathf.Clamp(d1, 1, 6);
-        d2 = Mathf.Clamp(d2, 1, 6);
-        return (d1 + d2) / 10f; // e.g., 2→0.2 up to 12→1.2
+        dice1 = Mathf.Clamp(dice1, 1, 6);
+        dice2 = Mathf.Clamp(dice2, 1, 6);
+        return (dice1 + dice2) / 10f; // e.g., 2→0.2 up to 12→1.2
     }
 }
