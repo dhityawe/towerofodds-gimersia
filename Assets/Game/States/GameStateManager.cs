@@ -59,6 +59,7 @@ public class GameStateManager : MonoBehaviour
     public ShopManager ShopManager => shopManager;
     public int CurrentWave => currentWave;
     public int MaxWaveKelipatan => maxWaveKelipatan;
+    public GameState CurrentState => currentState;
 
     void Awake()
     {
@@ -159,6 +160,12 @@ public class GameStateManager : MonoBehaviour
 
     public void TransitionToOpenShop()
     {
+        ChangeState(openShopState);
+    }
+
+    public void TransitionToOpenShop(ShopType shopType)
+    {
+        openShopState.OpenShop(shopType);
         ChangeState(openShopState);
     }
 

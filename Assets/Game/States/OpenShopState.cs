@@ -5,24 +5,38 @@ using UnityEngine;
 
 /// <summary>
 /// Open Shop State: Display shop UI and allow purchases.
+/// Supports 3 shop types: Skills, Items, Arcanes.
 /// Transition: Back to RollDice when player closes shop or clicks "Continue".
 /// </summary>
 public class OpenShopState : GameState
 {
+    private ShopType shopType;
+
     public OpenShopState(GameStateManager manager) : base(manager) { }
 
     public override void OnEnter()
     {
-        Debug.Log("[OpenShop] Shop is now open!");
+        // Default to Items shop if not specified
+        shopType = ShopType.Items;
+        OpenShop(shopType);
+    }
 
-        // Refresh shop with new random items
+    /// <summary>
+    /// Open a specific shop type.
+    /// </summary>
+    public void OpenShop(ShopType type)
+    {
+        shopType = type;
+        Debug.Log($"[OpenShop] {shopType} Shop is now open!");
+
+        // Refresh shop with specific type
         if (manager.ShopManager != null)
         {
-            manager.ShopManager.RefreshShop();
+            manager.ShopManager.RefreshShop(shopType);
         }
 
-        // TODO: Show shop UI
-        // shopUI.OpenShop();
+        // TODO: Show shop UI with shop type selector
+        // shopUI.OpenShop(shopType);
 
         // TODO: Pause game (optional)
         // Time.timeScale = 0f;
@@ -36,7 +50,7 @@ public class OpenShopState : GameState
 
     public override void OnExit()
     {
-        Debug.Log("[OpenShop] Shop closed. Continuing to next wave.");
+        Debug.Log($"[OpenShop] {shopType} Shop closed. Continuing to next wave.");
 
         // TODO: Hide shop UI
         // shopUI.CloseShop();
@@ -45,7 +59,7 @@ public class OpenShopState : GameState
         // Time.timeScale = 1f;
     }
 
-    public override string GetStateName() => "Open Shop";
+    public override string GetStateName() => $"Open Shop ({shopType})";
 
     // ====== PUBLIC METHODS ======
 
@@ -55,5 +69,16 @@ public class OpenShopState : GameState
     public void CloseShop()
     {
         manager.TransitionToRollDice();
+    }
+
+    /// <summary>
+    /// Switch to a different shop type without leaving the shop state.
+    /// </summary>
+    public void SwitchShopType(ShopType newType)
+    {
+        if (newType != shopType)
+        {
+            OpenShop(newType);
+        }
     }
 }

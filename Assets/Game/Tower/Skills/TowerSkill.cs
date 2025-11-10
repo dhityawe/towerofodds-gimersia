@@ -21,6 +21,15 @@ public abstract class TowerSkill : ScriptableObject, IShopItem
     [Header("Base Stats")]
     [Min(0f)] public float baseDamage = 10f;
 
+    [Header("Upgrade System")]
+    [Tooltip("Max level this skill can reach")]
+    [Min(1)] public int maxLevel = 5;
+    [Tooltip("Damage increase per level (%)")]
+    [Range(0f, 100f)] public float damageIncreasePerLevel = 10f; // 10% per level
+
+    [Header("Runtime State (Don't Edit)")]
+    [SerializeField] private int currentLevel = 1;
+
     /// <summary>
     /// Called when the skill is activated (usually on attack cycle).
     /// </summary>
@@ -51,7 +60,58 @@ public abstract class TowerSkill : ScriptableObject, IShopItem
     protected float GetDamageWithDice(int d1, int d2, float extraMultiplier = 1f)
     {
         float diceMultiplier = TowerBase.GetDiceMultiplier(d1, d2);
-        return baseDamage * diceMultiplier * Mathf.Max(0f, extraMultiplier);
+        float levelMultiplier = 1f + (currentLevel - 1) * (damageIncreasePerLevel / 100f);
+        return baseDamage * diceMultiplier * levelMultiplier * Mathf.Max(0f, extraMultiplier);
+    }
+
+    /// <summary>
+    /// Get the current level of this skill.
+    /// </summary>
+    public int GetLevel() => currentLevel;
+
+    /// <summary>
+    /// Get the max level of this skill.
+    /// </summary>
+    public int GetMaxLevel() => maxLevel;
+
+    /// <summary>
+    /// Check if this skill can be upgraded.
+    /// </summary>
+    public bool CanLevelUp() => currentLevel < maxLevel;
+
+    /// <summary>
+    /// Upgrade this skill to the next level.
+    /// Override this in derived classes to add custom upgrade effects.
+    /// </summary>
+    public virtual bool LevelUp()
+    {
+        if (!CanLevelUp())
+        {
+            Debug.LogWarning($"{skillName} is already at max level ({maxLevel})!");
+            return false;
+        }
+
+        currentLevel++;
+        OnLevelUp(currentLevel);
+        Debug.Log($"{skillName} upgraded to level {currentLevel}!");
+        return true;
+    }
+
+    /// <summary>
+    /// Called when skill levels up. Override to add custom upgrade effects.
+    /// </summary>
+    protected virtual void OnLevelUp(int newLevel)
+    {
+        // Default: just increase damage via GetDamageWithDice()
+        // Override in derived skills for custom behavior
+    }
+
+    /// <summary>
+    /// Reset skill to level 1 (for new game or testing).
+    /// </summary>
+    public virtual void ResetLevel()
+    {
+        currentLevel = 1;
     }
 
     // ====== IShopItem Implementation ======
@@ -64,12 +124,32 @@ public abstract class TowerSkill : ScriptableObject, IShopItem
 
     public virtual bool CanPurchase(TowerRuntime tower)
     {
-        // Check if tower has an empty skill slot
-        return tower.GetFirstEmptySlot() != -1;
+        // Can purchase if: have empty slot OR already have this skill equipped (for upgrade)
+        return tower.GetFirstEmptySlot() != -1 || HasSkillEquipped(tower);
     }
 
     public virtual bool OnPurchase(TowerRuntime tower)
     {
+        // Check if skill is already equipped (upgrade path)
+        int equippedSlot = GetEquippedSlotIndex(tower);
+        
+        if (equippedSlot != -1)
+        {
+            // Skill already equipped - upgrade it instead
+            if (CanLevelUp())
+            {
+                LevelUp();
+                Debug.Log($"Upgraded {skillName} to level {currentLevel}!");
+                return true;
+            }
+            else
+            {
+                Debug.LogWarning($"{skillName} is already at max level!");
+                return false;
+            }
+        }
+        
+        // New skill - equip to empty slot
         int emptySlot = tower.GetFirstEmptySlot();
         if (emptySlot == -1)
         {
@@ -80,5 +160,26 @@ public abstract class TowerSkill : ScriptableObject, IShopItem
         tower.EquipSkill(this, emptySlot);
         Debug.Log($"Purchased and equipped {skillName} to slot {emptySlot}");
         return true;
+    }
+
+    /// <summary>
+    /// Check if this skill is equipped on the tower.
+    /// </summary>
+    private bool HasSkillEquipped(TowerRuntime tower)
+    {
+        return GetEquippedSlotIndex(tower) != -1;
+    }
+
+    /// <summary>
+    /// Get the slot index where this skill is equipped, or -1 if not equipped.
+    /// </summary>
+    private int GetEquippedSlotIndex(TowerRuntime tower)
+    {
+        TowerSkill[] skills = tower.GetAllSkills();
+        for (int i = 0; i < skills.Length; i++)
+        {
+            if (skills[i] == this) return i;
+        }
+        return -1;
     }
 }

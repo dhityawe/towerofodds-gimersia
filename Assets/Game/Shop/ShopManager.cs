@@ -1,17 +1,34 @@
 // ShopManager.cs
 // Manages shop slots, randomization, and purchase flow
+// Supports 3 shop types: Skill Shop, Items Shop, Arcane Shop
 
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ShopType
+{
+    Skills,     // Skill shop (abilities for tower)
+    Items,      // Item shop (consumables, stat boosts)
+    Arcanes     // Arcane shop (dice modifiers, powerful passives)
+}
+
 public class ShopManager : MonoBehaviour
 {
     public const int SHOP_SLOT_COUNT = 3;
 
+    [Header("Shop Type")]
+    [SerializeField] private ShopType currentShopType = ShopType.Items;
+
     [Header("Shop Configuration")]
-    [Tooltip("Pool of all possible shop items (Skills, Items, Arcanes)")]
-    [SerializeField] private List<ScriptableObject> itemPool = new List<ScriptableObject>();
+    [Tooltip("Pool of Skills")]
+    [SerializeField] private List<TowerSkill> skillPool = new List<TowerSkill>();
+    
+    [Tooltip("Pool of Items")]
+    [SerializeField] private List<TowerItem> itemPool = new List<TowerItem>();
+    
+    [Tooltip("Pool of Arcanes (Dice Modifiers)")]
+    [SerializeField] private List<TowerArcane> arcanePool = new List<TowerArcane>();
 
     [Tooltip("Reference to the player's tower")]
     [SerializeField] private TowerRuntime playerTower;
@@ -81,23 +98,26 @@ public class ShopManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Regenerate all shop slots with random items.
+    /// Regenerate all shop slots with random items based on current shop type.
     /// </summary>
     public void RefreshShop()
     {
-        // Validate item pool
-        List<IShopItem> validItems = new List<IShopItem>();
-        foreach (var obj in itemPool)
-        {
-            if (obj is IShopItem shopItem)
-            {
-                validItems.Add(shopItem);
-            }
-        }
+        RefreshShop(currentShopType);
+    }
+
+    /// <summary>
+    /// Regenerate shop with specific shop type.
+    /// </summary>
+    public void RefreshShop(ShopType shopType)
+    {
+        currentShopType = shopType;
+
+        // Get appropriate pool based on shop type
+        List<IShopItem> validItems = GetItemPoolForShopType(shopType);
 
         if (validItems.Count == 0)
         {
-            Debug.LogWarning("ShopManager: Item pool is empty! Add Skills/Items/Arcanes to the pool.");
+            Debug.LogWarning($"ShopManager: {shopType} pool is empty! Add items to the pool.");
             return;
         }
 
@@ -109,7 +129,58 @@ public class ShopManager : MonoBehaviour
         }
 
         OnShopRefreshed?.Invoke(currentSlots);
-        Debug.Log($"Shop refreshed with {SHOP_SLOT_COUNT} items");
+        Debug.Log($"Shop refreshed with {SHOP_SLOT_COUNT} {shopType} items");
+    }
+
+    /// <summary>
+    /// Get the appropriate item pool based on shop type.
+    /// </summary>
+    private List<IShopItem> GetItemPoolForShopType(ShopType shopType)
+    {
+        List<IShopItem> validItems = new List<IShopItem>();
+
+        switch (shopType)
+        {
+            case ShopType.Skills:
+                // If all skill slots are full, only show equipped skills (for upgrades)
+                if (playerTower != null && playerTower.GetFirstEmptySlot() == -1)
+                {
+                    TowerSkill[] equippedSkills = playerTower.GetAllSkills();
+                    foreach (var skill in equippedSkills)
+                    {
+                        if (skill != null && skill.CanLevelUp())
+                        {
+                            validItems.Add(skill);
+                        }
+                    }
+                    Debug.Log($"Skill slots full - showing {validItems.Count} upgradeable equipped skills");
+                }
+                else
+                {
+                    // Normal case: show all skills from pool
+                    foreach (var skill in skillPool)
+                    {
+                        if (skill != null) validItems.Add(skill);
+                    }
+                }
+                break;
+
+            case ShopType.Items:
+                foreach (var item in itemPool)
+                {
+                    if (item != null) validItems.Add(item);
+                }
+                break;
+
+            case ShopType.Arcanes:
+                foreach (var arcane in arcanePool)
+                {
+                    if (arcane != null) validItems.Add(arcane);
+                }
+                break;
+        }
+
+        return validItems;
     }
 
     /// <summary>
@@ -227,17 +298,25 @@ public class ShopManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Manually add items to the pool (for runtime population).
+    /// Manually add items to the appropriate pool (for runtime population).
     /// </summary>
     public void AddToPool(ScriptableObject item)
     {
-        if (item is IShopItem)
+        if (item is TowerSkill skill)
         {
-            itemPool.Add(item);
+            skillPool.Add(skill);
+        }
+        else if (item is TowerItem towerItem)
+        {
+            itemPool.Add(towerItem);
+        }
+        else if (item is TowerArcane arcane)
+        {
+            arcanePool.Add(arcane);
         }
         else
         {
-            Debug.LogWarning($"Cannot add {item.name} to shop pool: doesn't implement IShopItem");
+            Debug.LogWarning($"Cannot add {item.name} to shop pool: not a TowerSkill, TowerItem, or TowerArcane");
         }
     }
 
@@ -251,12 +330,28 @@ public class ShopManager : MonoBehaviour
         var items = Resources.LoadAll<TowerItem>(resourcePath);
         var arcanes = Resources.LoadAll<TowerArcane>(resourcePath);
 
+        skillPool.Clear();
         itemPool.Clear();
-        itemPool.AddRange(skills);
-        itemPool.AddRange(items);
-        itemPool.AddRange(arcanes);
+        arcanePool.Clear();
 
-        Debug.Log($"Loaded {itemPool.Count} items from Resources/{resourcePath}");
+        skillPool.AddRange(skills);
+        itemPool.AddRange(items);
+        arcanePool.AddRange(arcanes);
+
+        Debug.Log($"Loaded {skillPool.Count} skills, {itemPool.Count} items, {arcanePool.Count} arcanes from Resources/{resourcePath}");
+    }
+
+    /// <summary>
+    /// Get current shop type.
+    /// </summary>
+    public ShopType GetCurrentShopType() => currentShopType;
+
+    /// <summary>
+    /// Set shop type (useful for UI switching between shops).
+    /// </summary>
+    public void SetShopType(ShopType shopType)
+    {
+        currentShopType = shopType;
     }
 
 #if UNITY_EDITOR
