@@ -812,7 +812,7 @@ MonoBehaviour:
   baseAttackSpeed: 1
   skillSlots:
   - {fileID: 11400000, guid: 7379c6796aba0634dbec041e0523c17b, type: 2}
-  - {fileID: 11400000, guid: 1b786ba1ed126cf46ab4eff88799c3ba, type: 2}
+  - {fileID: 11400000, guid: 3ebf3d48d4d7b2b459fdeed0d3a86359, type: 2}
   - {fileID: 11400000, guid: f91cb77021d6c594e845d12dbd64cfa6, type: 2}
   currentHp: 0
   isDead: 0
