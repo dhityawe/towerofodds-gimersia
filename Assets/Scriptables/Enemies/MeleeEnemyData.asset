@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec213ed91810d6547b5b5428b8ba1096, type: 3}
+  m_Name: MeleeEnemyData
+  m_EditorClassIdentifier: 
+  enemyType: 0
+  enemyName: Melee
+  description: 
+  maxHealth: 50
+  attackDamage: 15
+  attackRange: 1.2
+  attackCooldown: 1
+  moveSpeed: 2
+  preferredDistance: 8
+  damageReduction: 0
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 15
+  enemyColor: {r: 1, g: 0, b: 0.34424305, a: 1}
