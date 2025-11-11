@@ -102,11 +102,28 @@ public class HeartflareSkill : TowerSkill
             // Update visual size if pulse object exists
             if (pulse.pulseObject != null)
             {
-                // Update scale based on radius and original prefab scale
-                UpdatePulseScale(pulse, pulse.currentRadius);
-                
-                // Fade out alpha over time
-                UpdatePulseVisual(pulse.pulseObject, 1f - progress);
+                // Check if using Particle System
+                var particleSystem = pulse.pulseObject.GetComponent<ParticleSystem>();
+                if (particleSystem != null)
+                {
+                    // Update particle system shape radius for ring expansion
+                    var shapeModule = particleSystem.shape;
+                    shapeModule.radius = pulse.currentRadius;
+                    
+                    // Update main module start color alpha for fade out
+                    var mainModule = particleSystem.main;
+                    Color startColor = mainModule.startColor.color;
+                    startColor.a = (1f - progress) * pulseColor.a;
+                    mainModule.startColor = startColor;
+                }
+                else
+                {
+                    // Regular GameObject: update scale
+                    UpdatePulseScale(pulse, pulse.currentRadius);
+                    
+                    // Fade out alpha over time
+                    UpdatePulseVisual(pulse.pulseObject, 1f - progress);
+                }
             }
 
             // Check collision with enemies
@@ -180,11 +197,26 @@ public class HeartflareSkill : TowerSkill
             newPulse.pulseObject = Instantiate(pulsePrefab, tower.transform.position, Quaternion.identity);
             newPulse.pulseObject.name = $"Heartflare_Pulse_{slotIndex}";
             
-            // Store original prefab scale for reference (not used in current implementation)
+            // Store original prefab scale for reference
             newPulse.originalPrefabScale = pulsePrefab.transform.localScale;
             
-            // Set initial scale based on minRadius (in game units)
-            UpdatePulseScale(newPulse, minRadius);
+            // Check if prefab has Particle System
+            var particleSystem = newPulse.pulseObject.GetComponent<ParticleSystem>();
+            if (particleSystem != null)
+            {
+                // For particle system, set initial radius in Shape module
+                var shapeModule = particleSystem.shape;
+                shapeModule.radius = minRadius;
+                
+                // Play the particle system
+                particleSystem.Play();
+                Debug.Log($"[Heartflare] Using Particle System | Initial radius: {minRadius}");
+            }
+            else
+            {
+                // For regular GameObject, set initial scale based on minRadius
+                UpdatePulseScale(newPulse, minRadius);
+            }
         }
         else
         {

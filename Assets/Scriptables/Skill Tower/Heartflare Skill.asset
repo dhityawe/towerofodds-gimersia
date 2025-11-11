@@ -21,6 +21,6 @@ MonoBehaviour:
   maxRadius: 3
   minRadius: 0.8
   pulseDuration: 0.8
-  pulsePrefab: {fileID: 1200749732173133902, guid: 1f1420e8839d1a14cb3b5a1bcbb6a5df, type: 3}
+  pulsePrefab: {fileID: 729667680343577401, guid: 4935db794455fe34fbb3730ee79abd2e, type: 3}
   pulseColor: {r: 1, g: 1, b: 1, a: 1}
   skillCooldown: 2
