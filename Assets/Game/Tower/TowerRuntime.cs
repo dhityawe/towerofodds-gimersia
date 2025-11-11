@@ -270,10 +270,25 @@ public class TowerRuntime : MonoBehaviour
     public void AddArmor(float flat) => currentStats.Armor = Mathf.Max(0f, currentStats.Armor + flat);
     public void AddRegen(float flat) => currentStats.HpRegenPerSec = Mathf.Max(0f, currentStats.HpRegenPerSec + flat);
     public void AddAttackCount(int add) => currentStats.BaseAttackCount = Mathf.Max(1, currentStats.BaseAttackCount + add);
+    
     public void MultiplyAttackSpeed(float mult)
     {
         mult = Mathf.Max(0.01f, mult);
         currentStats.AttackSpeed = Mathf.Max(0.01f, currentStats.AttackSpeed * mult);
+    }
+
+    /// <summary>
+    /// Reduce attack interval by a flat amount (makes attacks faster).
+    /// Example: intervalReduction = -0.15 means subtract 0.15s from interval.
+    /// Clamps to minInterval (default 0.15s) to prevent infinite speed.
+    /// </summary>
+    public void AddAttackSpeedFlat(float intervalReduction, float minInterval = 0.15f)
+    {
+        float currentInterval = 1f / currentStats.AttackSpeed;
+        float newInterval = currentInterval + intervalReduction; // intervalReduction is negative to speed up
+        newInterval = Mathf.Max(minInterval, newInterval); // Clamp minimum
+        currentStats.AttackSpeed = 1f / newInterval;
+        Debug.Log($"[TowerRuntime] Flat interval change: {intervalReduction}s | New interval: {newInterval}s | New speed: {currentStats.AttackSpeed}");
     }
 
     // ====== Temporary Buff System ======
