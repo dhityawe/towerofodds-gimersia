@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Tempered Core
   description: Chunky survivability, pairs with regen.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: d2f24e399031bc347a406338930cbde3, type: 3}
   cost: 70
   rarity: 1
   maxStack: 20
   stackBonusPercent: 1
-  currentStack: 0
+  currentStack: 1
   statType: 1
   value: 20
   statDisplayName: Stat

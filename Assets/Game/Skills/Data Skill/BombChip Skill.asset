@@ -14,7 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Bomb Chip
   description: Someone modify this chip into explosion
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 1bbe0b78ccc985e42a1c78d15d61dfae, type: 3}
+  cost: 100
+  rarity: 0
   baseDamage: 10
+  maxLevel: 5
+  damageIncreasePerLevel: 10
+  currentLevel: 1
+  attackRange: 15
+  bombChipPrefab: {fileID: 0}
+  projectileSpeed: 15
   explosionRadius: 2.5
-  explosionDamageMultiplier: 0.8
+  explosionEffectPrefab: {fileID: 0}
+  explosionDuration: 0.3
+  skillCooldown: 0

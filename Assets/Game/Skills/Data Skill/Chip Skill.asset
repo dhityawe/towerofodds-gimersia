@@ -14,6 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Handy Chip
   description: Spread multiiple chip on hit
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 9e7ba39517374a24dac54a27c1ce56c2, type: 3}
+  cost: 100
+  rarity: 0
   baseDamage: 10
-  spreadAngle: 120
+  maxLevel: 5
+  damageIncreasePerLevel: 10
+  currentLevel: 1
+  attackRange: 15
+  chipProjectilePrefab: {fileID: 0}
+  miniChipPrefab: {fileID: 0}
+  projectileSpeed: 20
+  miniChipDamageMultiplier: 0.5

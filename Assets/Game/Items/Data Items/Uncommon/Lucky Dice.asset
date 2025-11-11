@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d4c916b49f0b02e4faa9523b52e432ca, type: 3}
-  m_Name: Rotary Magazine
+  m_Name: Lucky Dice
   m_EditorClassIdentifier: 
-  itemName: Rotary Magazine
+  itemName: Lucky Dice
   description: Big jump in multi-hit skills (Cards/Chip split)
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 6b41bd9cd3c884d4686b19502eb5eb5b, type: 3}
   cost: 70
   rarity: 1
   maxStack: 20
   stackBonusPercent: 1
-  currentStack: 0
+  currentStack: 3
   statType: 4
   value: 2
   statDisplayName: Stat

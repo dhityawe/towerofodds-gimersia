@@ -65,6 +65,12 @@ public class PlayerDataManager : MonoBehaviour
         ResetChips();
     }
 
+    void OnDestroy()
+    {
+        if (_instance == this)
+            _instance = null;
+    }
+
     // ====== CURRENCY MANAGEMENT ======
 
     /// <summary>

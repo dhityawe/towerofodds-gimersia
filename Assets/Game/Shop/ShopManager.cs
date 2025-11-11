@@ -51,6 +51,9 @@ public class ShopManager : MonoBehaviour
     public event Action<int, IShopItem> OnItemPurchased; // slotIndex, item
     public event Action<string> OnPurchaseFailed; // error message
 
+    // Disable Arcane shop for gamejam deadline
+    private bool arcaneShopEnabled = false;
+
     [System.Serializable]
     public class RarityWeights
     {
@@ -110,6 +113,12 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public void RefreshShop(ShopType shopType)
     {
+        // Disable Arcane shop if not ready
+        if (shopType == ShopType.Arcanes && !arcaneShopEnabled)
+        {
+            Debug.LogWarning("Arcane shop is disabled for this build.");
+            return;
+        }
         currentShopType = shopType;
 
         // Get appropriate pool based on shop type
@@ -173,6 +182,11 @@ public class ShopManager : MonoBehaviour
                 break;
 
             case ShopType.Arcanes:
+                if (!arcaneShopEnabled)
+                {
+                    Debug.LogWarning("Arcane shop is disabled for this build.");
+                    break;
+                }
                 foreach (var arcane in arcanePool)
                 {
                     if (arcane != null) validItems.Add(arcane);

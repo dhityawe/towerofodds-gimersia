@@ -16,18 +16,8 @@ public class ShopSlotUI : MonoBehaviour
     [SerializeField] private Image iconImage;
     [SerializeField] private TextMeshProUGUI nameText;
     [SerializeField] private TextMeshProUGUI descriptionText;
-    [SerializeField] private TextMeshProUGUI costText;
-    [SerializeField] private TextMeshProUGUI levelStackText; // Shows "Lv.3" or "Stack: 2/5"
-    [SerializeField] private Image rarityBorder;
     [SerializeField] private Button purchaseButton;
-    [SerializeField] private TextMeshProUGUI buttonText; // "Purchase" or "Sold"
-
-    [Header("Rarity Colors")]
-    [SerializeField] private Color commonColor = Color.gray;
-    [SerializeField] private Color uncommonColor = Color.green;
-    [SerializeField] private Color rareColor = Color.blue;
-    [SerializeField] private Color epicColor = new Color(0.6f, 0f, 1f); // Purple
-    [SerializeField] private Color legendaryColor = new Color(1f, 0.5f, 0f); // Orange
+    [SerializeField] private TextMeshProUGUI buttonText; // Shows price or "Sold!"
 
     [Header("Settings")]
     [SerializeField] private int slotIndex;
@@ -52,11 +42,15 @@ public class ShopSlotUI : MonoBehaviour
 
     void OnEnable()
     {
-        // Subscribe to shop refresh events
+        // Subscribe to shop events
         if (shopManager != null)
         {
             shopManager.OnShopRefreshed += OnShopRefreshed;
+            shopManager.OnItemPurchased += OnItemPurchased;
         }
+        
+        // Subscribe to chip changes
+        PlayerDataManager.Instance.OnChipsChanged += OnChipsChanged;
     }
 
     void OnDisable()
@@ -65,6 +59,13 @@ public class ShopSlotUI : MonoBehaviour
         if (shopManager != null)
         {
             shopManager.OnShopRefreshed -= OnShopRefreshed;
+            shopManager.OnItemPurchased -= OnItemPurchased;
+        }
+        
+        // Unsubscribe from chip changes
+        if (PlayerDataManager.Instance != null)
+        {
+            PlayerDataManager.Instance.OnChipsChanged -= OnChipsChanged;
         }
     }
 
@@ -95,6 +96,42 @@ public class ShopSlotUI : MonoBehaviour
     }
 
     /// <summary>
+    /// Called when any item is purchased. Updates this slot if it was the purchased one.
+    /// </summary>
+    private void OnItemPurchased(int purchasedSlotIndex, IShopItem item)
+    {
+        // Update this slot if it was purchased
+        if (purchasedSlotIndex == slotIndex)
+        {
+            // Get the latest slot data from shop manager
+            var slots = shopManager.GetCurrentSlots();
+            if (slotIndex < slots.Length)
+            {
+                currentSlot = slots[slotIndex];
+                UpdateDisplay(currentSlot);
+                Debug.Log($"[ShopSlotUI {slotIndex}] Updated display after purchase: {item.GetName()}");
+            }
+        }
+        else
+        {
+            // Another slot was purchased - update button affordability
+            // (chips changed, so we might not be able to afford this anymore)
+            UpdatePurchaseButton(currentSlot);
+        }
+    }
+
+    /// <summary>
+    /// Called when player's chips change. Updates button affordability.
+    /// </summary>
+    private void OnChipsChanged(int newChipAmount)
+    {
+        if (currentSlot != null)
+        {
+            UpdatePurchaseButton(currentSlot);
+        }
+    }
+
+    /// <summary>
     /// Update the visual display of this shop slot.
     /// </summary>
     public void UpdateDisplay(ShopManager.ShopSlot slot)
@@ -109,40 +146,52 @@ public class ShopSlotUI : MonoBehaviour
         gameObject.SetActive(true);
         currentSlot = slot;
 
-        // Update icon
+        // Cache item reference
+        IShopItem item = slot.item;
+
+        // Update icon - ensure proper sprite assignment and visibility
         if (iconImage != null)
         {
-            iconImage.sprite = slot.item.GetIcon();
-            iconImage.enabled = slot.item.GetIcon() != null;
+            Sprite itemIcon = item.GetIcon();
+            iconImage.sprite = itemIcon;
+            iconImage.enabled = itemIcon != null;
+            
+            if (itemIcon != null)
+            {
+                iconImage.color = Color.white; // Ensure visible
+                
+                // Force native size if image is too small/large
+                if (iconImage.type == Image.Type.Simple && iconImage.preserveAspect)
+                {
+                    iconImage.SetNativeSize();
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[ShopSlotUI {slotIndex}] '{item.GetName()}' missing icon in ScriptableObject!");
+            }
         }
 
         // Update name
         if (nameText != null)
         {
-            nameText.text = slot.item.GetName();
+            nameText.text = item.GetName();
         }
 
-        // Update description
+        // Update description - compact format with overflow handling
         if (descriptionText != null)
         {
-            descriptionText.text = slot.item.GetDescription();
-        }
-
-        // Update level/stack info
-        UpdateLevelStackInfo(slot.item);
-
-        // Update cost
-        if (costText != null)
-        {
-            costText.text = $"{slot.item.GetCost()} <sprite name=\"chip\">"; // Use chip icon if available
-            // Fallback without icon:
-            // costText.text = $"{slot.item.GetCost()} Chips";
-        }
-
-        // Update rarity border color
-        if (rarityBorder != null)
-        {
-            rarityBorder.color = GetRarityColor(slot.item.GetRarity());
+            string desc = item.GetDescription();
+            // Remove excessive line breaks and compact whitespace
+            desc = System.Text.RegularExpressions.Regex.Replace(desc, @"\n{2,}", "\n");
+            desc = desc.Trim();
+            descriptionText.text = desc;
+            
+            // Enable text overflow handling (requires TextMeshProUGUI)
+            if (descriptionText is TMPro.TextMeshProUGUI tmpText)
+            {
+                tmpText.overflowMode = TMPro.TextOverflowModes.Truncate;
+            }
         }
 
         // Update purchase button state
@@ -159,87 +208,22 @@ public class ShopSlotUI : MonoBehaviour
         bool canAfford = PlayerDataManager.Instance.Chips >= slot.item.GetCost();
         bool isPurchased = slot.isPurchased;
 
-        // Check if this is an upgrade/stack scenario
-        bool isUpgrade = IsUpgradeOrStack(slot.item);
-
         // Disable button if already purchased or can't afford
         purchaseButton.interactable = !isPurchased && canAfford;
 
-        // Update button text
+        // Update button text - show price or "Sold!"
         if (buttonText != null)
         {
             if (isPurchased)
             {
-                buttonText.text = "SOLD";
-            }
-            else if (!canAfford)
-            {
-                buttonText.text = "Too Expensive";
-            }
-            else if (isUpgrade)
-            {
-                buttonText.text = "UPGRADE";
+                buttonText.text = "Sold!";
             }
             else
             {
-                buttonText.text = "Purchase";
+                // Show price number only
+                buttonText.text = $"{slot.item.GetCost()}";
             }
         }
-    }
-
-    /// <summary>
-    /// Update level/stack display for skills and items.
-    /// </summary>
-    private void UpdateLevelStackInfo(IShopItem item)
-    {
-        if (levelStackText == null) return;
-
-        // Check if it's a skill with levels
-        if (item is TowerSkill skill)
-        {
-            if (skill.GetLevel() > 1 || skill.CanLevelUp())
-            {
-                levelStackText.text = $"Lv.{skill.GetLevel()}/{skill.GetMaxLevel()}";
-                levelStackText.gameObject.SetActive(true);
-            }
-            else
-            {
-                levelStackText.gameObject.SetActive(false);
-            }
-        }
-        // Check if it's an item with stacks
-        else if (item is TowerItem towerItem)
-        {
-            if (towerItem.GetMaxStack() > 0 && towerItem.GetStack() > 0)
-            {
-                levelStackText.text = $"Stack: {towerItem.GetStack()}/{towerItem.GetMaxStack()}";
-                levelStackText.gameObject.SetActive(true);
-            }
-            else
-            {
-                levelStackText.gameObject.SetActive(false);
-            }
-        }
-        else
-        {
-            levelStackText.gameObject.SetActive(false);
-        }
-    }
-
-    /// <summary>
-    /// Check if this item is an upgrade (skill level up) or stack (item stack up).
-    /// </summary>
-    private bool IsUpgradeOrStack(IShopItem item)
-    {
-        if (item is TowerSkill skill)
-        {
-            return skill.GetLevel() > 1 || skill.CanLevelUp();
-        }
-        else if (item is TowerItem towerItem)
-        {
-            return towerItem.GetStack() > 0;
-        }
-        return false;
     }
 
     /// <summary>
@@ -250,28 +234,6 @@ public class ShopSlotUI : MonoBehaviour
         if (shopManager != null)
         {
             shopManager.PurchaseItem(slotIndex);
-        }
-    }
-
-    /// <summary>
-    /// Get the color for a given rarity level.
-    /// </summary>
-    private Color GetRarityColor(ShopItemRarity rarity)
-    {
-        switch (rarity)
-        {
-            case ShopItemRarity.Common:
-                return commonColor;
-            case ShopItemRarity.Uncommon:
-                return uncommonColor;
-            case ShopItemRarity.Rare:
-                return rareColor;
-            case ShopItemRarity.Epic:
-                return epicColor;
-            case ShopItemRarity.Legendary:
-                return legendaryColor;
-            default:
-                return Color.white;
         }
     }
 
@@ -287,18 +249,5 @@ public class ShopSlotUI : MonoBehaviour
         }
     }
 
-    // ====== EDITOR HELPERS ======
 
-#if UNITY_EDITOR
-    [ContextMenu("Test Display (Common Item)")]
-    private void TestDisplay()
-    {
-        // Test display with dummy data
-        if (nameText != null) nameText.text = "Test Item";
-        if (descriptionText != null) descriptionText.text = "This is a test item description showing how the UI looks.";
-        if (costText != null) costText.text = "25 Chips";
-        if (rarityBorder != null) rarityBorder.color = commonColor;
-        if (buttonText != null) buttonText.text = "Purchase";
-    }
-#endif
 }

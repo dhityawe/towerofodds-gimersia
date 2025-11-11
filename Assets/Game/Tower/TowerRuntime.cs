@@ -26,6 +26,8 @@ public class TowerRuntime : MonoBehaviour
 
     // Expose death event so other systems can subscribe without direct access to fields
     public event Action OnDeath;
+    public event Action<int, TowerSkill> OnSkillEquipped; // slotIndex, skill
+    public event Action<int> OnSkillUnequipped; // slotIndex
 
     private float attackTimer;
     private TowerBase.Stats currentStats;
@@ -361,6 +363,7 @@ public class TowerRuntime : MonoBehaviour
         if (skill != null)
         {
             skill.OnEquip(this, slotIndex);
+            OnSkillEquipped?.Invoke(slotIndex, skill);
         }
 
         return true;
@@ -375,6 +378,7 @@ public class TowerRuntime : MonoBehaviour
         {
             skillSlots[slotIndex].OnUnequip(this, slotIndex);
             skillSlots[slotIndex] = null;
+            OnSkillUnequipped?.Invoke(slotIndex);
         }
     }
 

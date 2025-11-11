@@ -14,8 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Heartflare
   description: Send a pulse of heart into certain radius
-  icon: {fileID: 0}
+  icon: {fileID: 6524166545311316082, guid: 0882ebe304efc0e46986d2a7708f8c68, type: 3}
+  cost: 100
+  rarity: 0
   baseDamage: 10
+  maxLevel: 5
+  damageIncreasePerLevel: 10
+  currentLevel: 1
   maxRadius: 5
-  basePulseDuration: 1
+  minRadius: 0.5
+  pulseDuration: 0.8
+  pulsePrefab: {fileID: 0}
   pulseColor: {r: 1, g: 0.4, b: 0.7, a: 0.5}
+  skillCooldown: 0
