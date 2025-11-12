@@ -60,7 +60,9 @@ public class ChipSkill : TowerSkill
                     splitCount,
                     projectileSpeed,
                     miniChipPrefab,
-                    tower
+                    tower,
+                    hitSound,
+                    hitSoundVolume
                 );
                 
                 Debug.Log($"[Chip] Fired! Primary: {primaryDamage:F1} dmg | Mini: {miniDamage:F1} dmg | Splits: {splitCount} | Tower Multiplier: {towerDiceMultiplier:F2} | Target: {target.name}");

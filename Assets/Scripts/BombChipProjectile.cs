@@ -16,10 +16,13 @@ public class BombChipProjectile : MonoBehaviour
     private float explosionDuration;
     private TowerRuntime towerRuntime;
     private bool hasHit = false;
+    private AudioClip hitSound;
+    private float hitSoundVolume = 1f;
 
     public void Init(float projectileSpeed, float hitDamage, Transform targetTransform, 
                      TowerRuntime tower, float explRadius, float aoeHitDamage, 
-                     GameObject explosionPrefab, float explDuration)
+                     GameObject explosionPrefab, float explDuration,
+                     AudioClip hitAudio = null, float audioVolume = 1f)
     {
         speed = projectileSpeed;
         directDamage = hitDamage;
@@ -29,6 +32,8 @@ public class BombChipProjectile : MonoBehaviour
         aoeDamage = aoeHitDamage;
         explosionEffectPrefab = explosionPrefab;
         explosionDuration = explDuration;
+        hitSound = hitAudio;
+        hitSoundVolume = audioVolume;
     }
 
     private void Update()
@@ -59,6 +64,12 @@ public class BombChipProjectile : MonoBehaviour
         hasHit = true;
 
         Vector3 hitPosition = transform.position;
+
+        // Play hit/explosion sound
+        if (hitSound != null)
+        {
+            AudioSource.PlayClipAtPoint(hitSound, hitPosition, hitSoundVolume);
+        }
 
         // Apply direct damage to the hit enemy
         var hitEnemy = target.GetComponent<BaseEnemy>();

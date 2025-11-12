@@ -21,6 +21,13 @@ public abstract class TowerSkill : ScriptableObject, IShopItem
     [Header("Base Stats")]
     [Min(0f)] public float baseDamage = 10f;
 
+    [Header("Audio")]
+    [Tooltip("Sound effect when skill hits enemy")]
+    [SerializeField] protected AudioClip hitSound;
+    
+    [Tooltip("Volume for hit sound (0-1)")]
+    [SerializeField, Range(0f, 1f)] protected float hitSoundVolume = 1f;
+
     [Header("Upgrade System")]
     [Tooltip("Max level this skill can reach")]
     [Min(1)] public int maxLevel = 5;
@@ -62,6 +69,17 @@ public abstract class TowerSkill : ScriptableObject, IShopItem
         float diceMultiplier = TowerBase.GetDiceMultiplier(d1, d2);
         float levelMultiplier = 1f + (currentLevel - 1) * (damageIncreasePerLevel / 100f);
         return baseDamage * diceMultiplier * levelMultiplier * Mathf.Max(0f, extraMultiplier);
+    }
+
+    /// <summary>
+    /// Play hit sound effect at given position.
+    /// </summary>
+    protected void PlayHitSound(Vector3 position)
+    {
+        if (hitSound != null)
+        {
+            AudioSource.PlayClipAtPoint(hitSound, position, hitSoundVolume);
+        }
     }
 
     /// <summary>

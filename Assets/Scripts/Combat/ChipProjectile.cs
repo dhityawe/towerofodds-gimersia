@@ -17,6 +17,8 @@ namespace TowerOfOdds.Combat
         private GameObject miniChipPrefab;
         private bool hasHit;
         private TowerRuntime sourceTower;
+        private AudioClip hitSound;
+        private float hitSoundVolume = 1f;
 
         /// <summary>
         /// Initialize the chip projectile.
@@ -28,8 +30,11 @@ namespace TowerOfOdds.Combat
         /// <param name="travelSpeed">Projectile speed</param>
         /// <param name="miniPrefab">Prefab for mini-chip projectiles</param>
         /// <param name="tower">Source tower reference for enemy finding</param>
+        /// <param name="hitAudio">Audio clip to play on hit</param>
+        /// <param name="audioVolume">Volume for hit sound</param>
         public void Init(Transform targetTransform, float primaryDmg, float miniDmg, int splits, 
-                        float travelSpeed, GameObject miniPrefab, TowerRuntime tower)
+                        float travelSpeed, GameObject miniPrefab, TowerRuntime tower, 
+                        AudioClip hitAudio = null, float audioVolume = 1f)
         {
             target = targetTransform;
             primaryDamage = primaryDmg;
@@ -38,6 +43,8 @@ namespace TowerOfOdds.Combat
             speed = travelSpeed;
             miniChipPrefab = miniPrefab;
             sourceTower = tower;
+            hitSound = hitAudio;
+            hitSoundVolume = audioVolume;
         }
 
         private void Update()
@@ -68,6 +75,12 @@ namespace TowerOfOdds.Combat
         {
             if (hasHit) return; // Prevent multiple hits
             hasHit = true;
+
+            // Play hit sound
+            if (hitSound != null)
+            {
+                AudioSource.PlayClipAtPoint(hitSound, transform.position, hitSoundVolume);
+            }
 
             // Apply primary damage
             Enemies.BaseEnemy enemy = target.GetComponent<Enemies.BaseEnemy>();

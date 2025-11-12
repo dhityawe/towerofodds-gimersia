@@ -13,13 +13,17 @@ namespace TowerOfOdds.Combat
         private float speed;
         private float damage;
         private bool targetIsTower;
+        private AudioClip hitSound;
+        private float hitSoundVolume = 1f;
 
-        public void Init(Transform targetTransform, float damageAmount, float travelSpeed, bool isTargetTower)
+        public void Init(Transform targetTransform, float damageAmount, float travelSpeed, bool isTargetTower, AudioClip hitAudio = null, float audioVolume = 1f)
         {
             target = targetTransform;
             damage = damageAmount;
             speed = travelSpeed;
             targetIsTower = isTargetTower;
+            hitSound = hitAudio;
+            hitSoundVolume = audioVolume;
         }
 
         private void Update()
@@ -40,6 +44,12 @@ namespace TowerOfOdds.Combat
             // If we reached the target (or close enough), apply damage
             if (Vector3.Distance(transform.position, targetPos) <= 0.15f)
             {
+                // Play hit sound
+                if (hitSound != null)
+                {
+                    AudioSource.PlayClipAtPoint(hitSound, transform.position, hitSoundVolume);
+                }
+
                 if (targetIsTower)
                 {
                     // Try new tower system first

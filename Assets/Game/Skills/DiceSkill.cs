@@ -50,7 +50,7 @@ public class DiceSkill : TowerSkill
             
             if (projectile != null)
             {
-                projectile.Init(target.transform, damage, projectileSpeed, false);
+                projectile.Init(target.transform, damage, projectileSpeed, false, hitSound, hitSoundVolume);
                 
                 // Apply speed-up buff after hit
                 // Reduce AttackSpeed by (0.03 * pipRoll) for 0.75s, clamped to minimum 0.15s
@@ -68,6 +68,7 @@ public class DiceSkill : TowerSkill
         {
             // Direct damage fallback
             target.TakeDamage(damage);
+            PlayHitSound(target.transform.position);
             ApplySpeedUpBuff(tower, pipRoll);
             Debug.Log($"[Dice] Direct hit: {damage:F1} | Speed buff applied (no projectile)");
         }

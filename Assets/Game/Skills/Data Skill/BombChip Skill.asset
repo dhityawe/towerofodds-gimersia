@@ -18,6 +18,8 @@ MonoBehaviour:
   cost: 100
   rarity: 0
   baseDamage: 10
+  hitSound: {fileID: 8300000, guid: 57985354bc0376b4a8de7f3a4a808325, type: 3}
+  hitSoundVolume: 1
   maxLevel: 5
   damageIncreasePerLevel: 10
   currentLevel: 1

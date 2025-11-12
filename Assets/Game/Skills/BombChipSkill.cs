@@ -111,7 +111,7 @@ public class BombChipSkill : TowerSkill
 
         // Add BombChipProjectile component
         var bombChip = projectileObj.AddComponent<BombChipProjectile>();
-        bombChip.Init(projectileSpeed, directDamage, targetEnemy.transform, tower, explosionRadius, aoeDamage, explosionEffectPrefab, explosionDuration);
+        bombChip.Init(projectileSpeed, directDamage, targetEnemy.transform, tower, explosionRadius, aoeDamage, explosionEffectPrefab, explosionDuration, hitSound, hitSoundVolume);
 
         // Set cooldown
         if (skillCooldown > 0f)
