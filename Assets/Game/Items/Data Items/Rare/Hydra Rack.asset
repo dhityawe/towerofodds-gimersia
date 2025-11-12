@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4c916b49f0b02e4faa9523b52e432ca, type: 3}
   m_Name: Hydra Rack
   m_EditorClassIdentifier: 
-  itemName: Hydra Rack
+  itemName: Jackpot Chip
   description: Explosive scaling for any multi-projectile skill.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 0dac29d99986e534f98153eadefca3d7, type: 3}
   cost: 200
   rarity: 2
   maxStack: 20

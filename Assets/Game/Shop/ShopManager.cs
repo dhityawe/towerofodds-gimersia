@@ -50,6 +50,8 @@ public class ShopManager : MonoBehaviour
     public event Action<ShopSlot[]> OnShopRefreshed;
     public event Action<int, IShopItem> OnItemPurchased; // slotIndex, item
     public event Action<string> OnPurchaseFailed; // error message
+    public event Action OnShowShop; // Shop panel should show
+    public event Action OnHideShop; // Shop panel should hide
 
     // Disable Arcane shop for gamejam deadline
     private bool arcaneShopEnabled = false;
@@ -366,6 +368,24 @@ public class ShopManager : MonoBehaviour
     public void SetShopType(ShopType shopType)
     {
         currentShopType = shopType;
+    }
+
+    /// <summary>
+    /// Show the shop and fire event for UI listeners.
+    /// </summary>
+    public void ShowShop()
+    {
+        OnShowShop?.Invoke();
+        Debug.Log("[ShopManager] Shop shown");
+    }
+
+    /// <summary>
+    /// Hide the shop and fire event for UI listeners.
+    /// </summary>
+    public void HideShop()
+    {
+        OnHideShop?.Invoke();
+        Debug.Log("[ShopManager] Shop hidden");
     }
 
 #if UNITY_EDITOR

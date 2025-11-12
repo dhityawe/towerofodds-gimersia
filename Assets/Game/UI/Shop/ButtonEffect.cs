@@ -101,7 +101,9 @@ public class ButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     void OnEnable()
     {
-        button.onClick.AddListener(OnButtonClicked);
+        // Don't subscribe to onClick - we handle effects in OnPointerDown/Up instead
+        // This ensures effects play even if the button's onClick action disables/destroys it
+        
         // Recapture position when re-enabled (in case parent moved)
         if (isInitialized)
         {
@@ -111,7 +113,6 @@ public class ButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     void OnDisable()
     {
-        button.onClick.RemoveListener(OnButtonClicked);
         KillAllTweens();
         ResetToOriginal();
     }
@@ -126,7 +127,7 @@ public class ButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         // Reset all visual properties to original state
         transform.localScale = originalScale;
         transform.localPosition = originalPosition;
-        transform.localRotation = Quaternion.identity;
+        transform.localRotation = Quaternion.identity; // Always reset rotation
         
         if (enableColorChange && targetImage != null)
         {
@@ -134,57 +135,26 @@ public class ButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         }
     }
 
-    private void OnButtonClicked()
-    {
-        if (!button.interactable) return;
-
-        // Play punch scale effect
-        transform.DOKill();
-        transform.DOPunchScale(Vector3.one * (clickPunchScale - 1f), clickPunchDuration, clickVibrato, clickElasticity)
-            .SetEase(Ease.OutElastic);
-
-        // Rotation wiggle
-        if (enableRotationWiggle)
-        {
-            transform.DOPunchRotation(new Vector3(0, 0, wiggleAngle), wiggleDuration, 10, 1f);
-        }
-
-        // Play click sound with pitch variation
-        if (clickClip != null && audioSource != null)
-        {
-            audioSource.pitch = 1f + Random.Range(-pitchVariation, pitchVariation);
-            audioSource.PlayOneShot(clickClip, clickVolume);
-        }
-
-        // Spawn particles
-        if (clickParticles != null)
-        {
-            clickParticles.Play();
-        }
-    }
-
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (!button.interactable) return;
 
-        // ALWAYS capture current position as original before hover (prevents jumping)
-        // This ensures we use the button's actual current position, not a stale one
-        originalPosition = transform.localPosition;
-
         isHovering = true;
+
+        // Kill existing tweens and reset to original position first
+        KillHoverTweens();
+        transform.localPosition = originalPosition; // Reset position immediately to prevent drift
 
         // Hover scale
         if (enableHoverScale)
         {
-            hoverTween?.Kill();
             hoverTween = transform.DOScale(originalScale * hoverScale, hoverDuration)
                 .SetEase(hoverEase);
         }
 
-        // Hover bounce
+        // Hover bounce (always start from original position)
         if (enableHoverBounce)
         {
-            bounceTween?.Kill();
             Vector3 targetPos = originalPosition + new Vector3(0, bounceAmount, 0);
             bounceTween = transform.DOLocalMove(targetPos, bounceDuration)
                 .SetEase(Ease.OutQuad);
@@ -210,20 +180,17 @@ public class ButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
         isHovering = false;
 
-        // Reset scale
+        // Kill hover tweens
+        KillHoverTweens();
+
+        // Reset to original position and scale immediately to prevent drift
+        transform.localPosition = originalPosition;
+
+        // Animate back to original scale
         if (enableHoverScale)
         {
-            hoverTween?.Kill();
             hoverTween = transform.DOScale(originalScale, hoverDuration)
                 .SetEase(Ease.OutQuad);
-        }
-
-        // Reset position
-        if (enableHoverBounce)
-        {
-            bounceTween?.Kill();
-            bounceTween = transform.DOLocalMove(originalPosition, bounceDuration * 0.5f)
-                .SetEase(Ease.InQuad);
         }
 
         // Reset color
@@ -237,8 +204,8 @@ public class ButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {
         if (!button.interactable || !enablePressDown) return;
 
-        // Quick press down
-        transform.DOKill();
+        // Kill scale tweens only, preserve rotation
+        transform.DOKill(false);
         transform.DOScale(originalScale * pressDownScale, pressDownDuration)
             .SetEase(Ease.OutQuad);
 
@@ -264,6 +231,45 @@ public class ButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             Color targetColor = isHovering ? hoverColor : originalColor;
             targetImage.DOColor(targetColor, colorTransitionDuration);
         }
+
+        // Play click effects on pointer up (ensures effects play even if button gets disabled during onClick)
+        PlayClickEffects();
+    }
+
+    /// <summary>
+    /// Play all click effects (sound, particles, rotation).
+    /// Called on pointer up to ensure effects play even if button action disables/destroys the button.
+    /// </summary>
+    private void PlayClickEffects()
+    {
+        if (!button.interactable) return;
+
+        // Kill all existing tweens and reset rotation to prevent spam-click drift
+        transform.DOKill(true); // Complete existing tweens
+        transform.localRotation = Quaternion.identity; // Reset rotation immediately
+
+        // Play punch scale effect
+        transform.DOPunchScale(Vector3.one * (clickPunchScale - 1f), clickPunchDuration, clickVibrato, clickElasticity)
+            .SetEase(Ease.OutElastic);
+
+        // Rotation wiggle (starts from zero rotation)
+        if (enableRotationWiggle)
+        {
+            transform.DOPunchRotation(new Vector3(0, 0, wiggleAngle), wiggleDuration, 10, 1f);
+        }
+
+        // Play click sound with pitch variation
+        if (clickClip != null && audioSource != null)
+        {
+            audioSource.pitch = 1f + Random.Range(-pitchVariation, pitchVariation);
+            audioSource.PlayOneShot(clickClip, clickVolume);
+        }
+
+        // Spawn particles
+        if (clickParticles != null)
+        {
+            clickParticles.Play();
+        }
     }
 
     private void KillAllTweens()
@@ -275,6 +281,12 @@ public class ButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         {
             targetImage.DOKill();
         }
+    }
+
+    private void KillHoverTweens()
+    {
+        hoverTween?.Kill();
+        bounceTween?.Kill();
     }
 
 #if UNITY_EDITOR

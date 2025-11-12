@@ -1,5 +1,6 @@
 using UnityEngine;
 using DG.Tweening;
+using System;
 
 /// <summary>
 /// Handles smooth panel transitions with various animation effects.
@@ -12,8 +13,8 @@ public class PanelTransitionHandle : MonoBehaviour
     [SerializeField] private TransitionType hideTransition = TransitionType.Scale;
     [SerializeField] private float showDuration = 0.3f;
     [SerializeField] private float hideDuration = 0.2f;
-    [SerializeField] private Ease showEase = Ease.OutBack;
-    [SerializeField] private Ease hideEase = Ease.InBack;
+    [SerializeField] private Ease showEase = Ease.OutQuad;
+    [SerializeField] private Ease hideEase = Ease.InQuad;
 
     [Header("Advanced Options")]
     [SerializeField] private bool disableOnHide = true;
@@ -43,8 +44,8 @@ public class PanelTransitionHandle : MonoBehaviour
     private bool isVisible = true;
 
     // Events
-    public System.Action OnShowComplete;
-    public System.Action OnHideComplete;
+    public Action OnShowComplete;
+    public Action OnHideComplete;
 
     private void Awake()
     {
