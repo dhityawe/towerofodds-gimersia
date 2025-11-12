@@ -34,8 +34,15 @@ public class ShopUI : MonoBehaviour
         public GameObject purchasedOverlay;
     }
 
-    void OnEnable()
+    void Awake()
     {
+        // Find ShopManager if not assigned
+        if (shopManager == null)
+        {
+            shopManager = FindFirstObjectByType<ShopManager>();
+        }
+
+        // Subscribe to events early (before OnEnable might be called)
         if (shopManager != null)
         {
             shopManager.OnShowShop += OnShowShop;
@@ -46,8 +53,9 @@ public class ShopUI : MonoBehaviour
         }
     }
 
-    void OnDisable()
+    void OnDestroy()
     {
+        // Unsubscribe from events
         if (shopManager != null)
         {
             shopManager.OnShowShop -= OnShowShop;

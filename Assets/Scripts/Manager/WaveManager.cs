@@ -98,7 +98,19 @@ namespace TowerOfOdds.Manager
 
         public void StartNextWave()
         {
-            currentWave++;
+            // Don't increment here - GameStateManager handles wave counting
+            // Use the current wave number from GameStateManager
+            var gameStateManager = GameStateManager.Instance;
+            if (gameStateManager != null)
+            {
+                currentWave = gameStateManager.CurrentWave;
+            }
+            else
+            {
+                // Fallback: increment locally if no GameStateManager
+                currentWave++;
+            }
+
             currentWaveData = GenerateWaveData(currentWave);
             waveTimer = 0f;
             waveActive = true;
@@ -116,6 +128,11 @@ namespace TowerOfOdds.Manager
             if (enemySpawner != null)
             {
                 enemySpawner.StartWave(currentWaveData);
+                Debug.Log($"[WaveManager] EnemySpawner.StartWave() called with {currentWaveData.TotalEnemies} enemies");
+            }
+            else
+            {
+                Debug.LogError("[WaveManager] EnemySpawner is null! Enemies will not spawn!");
             }
         }
 

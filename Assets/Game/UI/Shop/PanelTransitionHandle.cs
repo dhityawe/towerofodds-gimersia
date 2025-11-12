@@ -1,13 +1,22 @@
 using UnityEngine;
+using UnityEngine.UI;
 using DG.Tweening;
 using System;
 
 /// <summary>
 /// Handles smooth panel transitions with various animation effects.
-/// Attach to any UI panel GameObject to enable show/hide animations.
+/// Attach to an empty GameObject to control a target panel and background.
 /// </summary>
 public class PanelTransitionHandle : MonoBehaviour
 {
+    [Header("Target References")]
+    [SerializeField] private RectTransform targetObject;
+    [SerializeField] private Image bg;
+
+    [Header("Background Settings")]
+    [SerializeField] private float bgShowAlpha = 220f / 255f; // 220 alpha
+    [SerializeField] private float bgAnimationDuration = 1.5f;
+
     [Header("Transition Settings")]
     [SerializeField] private TransitionType showTransition = TransitionType.Scale;
     [SerializeField] private TransitionType hideTransition = TransitionType.Scale;
@@ -17,7 +26,7 @@ public class PanelTransitionHandle : MonoBehaviour
     [SerializeField] private Ease hideEase = Ease.InQuad;
 
     [Header("Advanced Options")]
-    [SerializeField] private bool disableOnHide = true;
+    [SerializeField] private bool disableOnHide = false;
     [SerializeField] private bool startHidden = false;
     [SerializeField] private float delayBeforeShow = 0f;
     [SerializeField] private float delayBeforeHide = 0f;
@@ -41,6 +50,7 @@ public class PanelTransitionHandle : MonoBehaviour
     private Vector2 originalPosition;
     private Vector2 centerPosition; // Position with Y=0
     private Sequence currentSequence;
+    private Sequence bgSequence;
     private bool isVisible = true;
 
     // Events
@@ -49,19 +59,41 @@ public class PanelTransitionHandle : MonoBehaviour
 
     private void Awake()
     {
-        rectTransform = GetComponent<RectTransform>();
+        // Use targetObject if assigned, otherwise use this GameObject's RectTransform
+        if (targetObject != null)
+        {
+            rectTransform = targetObject;
+        }
+        else
+        {
+            rectTransform = GetComponent<RectTransform>();
+            if (rectTransform == null)
+            {
+                Debug.LogError("[PanelTransitionHandle] No targetObject assigned and no RectTransform on this GameObject!");
+                return;
+            }
+        }
         
         // Ensure CanvasGroup exists for fade transitions
-        canvasGroup = GetComponent<CanvasGroup>();
+        canvasGroup = rectTransform.GetComponent<CanvasGroup>();
         if (canvasGroup == null && NeedsFade())
         {
-            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            canvasGroup = rectTransform.gameObject.AddComponent<CanvasGroup>();
         }
 
         // Store original values
         originalScale = rectTransform.localScale;
         originalPosition = rectTransform.anchoredPosition;
         centerPosition = new Vector2(originalPosition.x, 0f); // Keep X, set Y to 0
+
+        // Setup background
+        if (bg != null)
+        {
+            Color bgColor = bg.color;
+            bgColor.a = 0f;
+            bg.color = bgColor;
+            bg.raycastTarget = false;
+        }
 
         // Start hidden if requested
         if (startHidden)
@@ -75,6 +107,7 @@ public class PanelTransitionHandle : MonoBehaviour
     {
         // Kill any running animations
         currentSequence?.Kill();
+        bgSequence?.Kill();
     }
 
     /// <summary>
@@ -86,10 +119,32 @@ public class PanelTransitionHandle : MonoBehaviour
 
         // Kill any existing animation
         currentSequence?.Kill();
+        bgSequence?.Kill();
 
         // Enable GameObject
-        gameObject.SetActive(true);
+        if (targetObject != null)
+        {
+            targetObject.gameObject.SetActive(true);
+        }
+        else
+        {
+            gameObject.SetActive(true);
+        }
         isVisible = true;
+
+        // Enable raycast blocking on background
+        if (bg != null)
+        {
+            bg.raycastTarget = true;
+            
+            // Animate background alpha from 0 to 220
+            Color bgColor = bg.color;
+            bgColor.a = 0f;
+            bg.color = bgColor;
+            
+            bgSequence = DOTween.Sequence();
+            bgSequence.Append(bg.DOFade(bgShowAlpha, bgAnimationDuration).SetEase(Ease.OutQuad));
+        }
 
         // Setup initial state
         SetupHiddenState();
@@ -153,7 +208,22 @@ public class PanelTransitionHandle : MonoBehaviour
 
         // Kill any existing animation
         currentSequence?.Kill();
+        bgSequence?.Kill();
         isVisible = false;
+
+        // Animate background alpha from 220 to 0
+        if (bg != null)
+        {
+            bgSequence = DOTween.Sequence();
+            bgSequence.Append(bg.DOFade(0f, bgAnimationDuration).SetEase(Ease.InQuad));
+            bgSequence.OnComplete(() => 
+            {
+                if (bg != null)
+                {
+                    bg.raycastTarget = false;
+                }
+            });
+        }
 
         // Create animation sequence
         currentSequence = DOTween.Sequence();
@@ -209,7 +279,14 @@ public class PanelTransitionHandle : MonoBehaviour
         {
             if (disableOnHide)
             {
-                gameObject.SetActive(false);
+                if (targetObject != null)
+                {
+                    targetObject.gameObject.SetActive(false);
+                }
+                else
+                {
+                    gameObject.SetActive(false);
+                }
             }
             OnHideComplete?.Invoke();
         });
@@ -232,9 +309,29 @@ public class PanelTransitionHandle : MonoBehaviour
     public void ShowImmediate()
     {
         currentSequence?.Kill();
-        gameObject.SetActive(true);
+        bgSequence?.Kill();
+        
+        if (targetObject != null)
+        {
+            targetObject.gameObject.SetActive(true);
+        }
+        else
+        {
+            gameObject.SetActive(true);
+        }
+        
         ResetToVisible();
         isVisible = true;
+        
+        // Set background immediately
+        if (bg != null)
+        {
+            bg.raycastTarget = true;
+            Color bgColor = bg.color;
+            bgColor.a = bgShowAlpha;
+            bg.color = bgColor;
+        }
+        
         OnShowComplete?.Invoke();
     }
 
@@ -244,12 +341,33 @@ public class PanelTransitionHandle : MonoBehaviour
     public void HideImmediate()
     {
         currentSequence?.Kill();
+        bgSequence?.Kill();
+        
         SetupHiddenState();
+        
         if (disableOnHide)
         {
-            gameObject.SetActive(false);
+            if (targetObject != null)
+            {
+                targetObject.gameObject.SetActive(false);
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
         }
+        
         isVisible = false;
+        
+        // Hide background immediately
+        if (bg != null)
+        {
+            bg.raycastTarget = false;
+            Color bgColor = bg.color;
+            bgColor.a = 0f;
+            bg.color = bgColor;
+        }
+        
         OnHideComplete?.Invoke();
     }
 

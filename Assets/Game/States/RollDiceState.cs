@@ -111,11 +111,11 @@ public class RollDiceState : GameState
             diceRollUI.OnAllRollsComplete -= OnAllRollsComplete;
         }
 
-        // Hide panel
-        if (dicePanel != null)
-        {
-            dicePanel.SetActive(false);
-        }
+        // Don't hide panel - keep it visible during wave
+        // if (dicePanel != null)
+        // {
+        //     dicePanel.SetActive(false);
+        // }
     }
 
     public override string GetStateName() => "Roll Dice";

@@ -17,14 +17,20 @@ public class OpenShopState : GameState
 
     public override void OnEnter()
     {
-        // Default to Items shop if not specified
-        shopType = ShopType.Items;
+        // Default to Skills shop if not specified
+        shopType = ShopType.Skills;
         isClosing = false;
         
         // Subscribe to purchase events
         if (manager.ShopManager != null)
         {
+            manager.ShopManager.OnItemPurchased -= OnItemPurchased; // Unsubscribe first to prevent duplicates
             manager.ShopManager.OnItemPurchased += OnItemPurchased;
+            Debug.Log("[OpenShop] Subscribed to OnItemPurchased event");
+        }
+        else
+        {
+            Debug.LogError("[OpenShop] ShopManager is null! Cannot subscribe to purchase events.");
         }
         
         OpenShop(shopType);
@@ -45,6 +51,18 @@ public class OpenShopState : GameState
             
             // Show shop UI via ShopManager event
             manager.ShopManager.ShowShop();
+            
+            // Also directly call Show() on PanelTransitionHandle to ensure animation plays
+            var panelTransition = Object.FindFirstObjectByType<PanelTransitionHandle>();
+            if (panelTransition != null)
+            {
+                panelTransition.Show();
+                Debug.Log("[OpenShop] Called Show() on PanelTransitionHandle");
+            }
+            else
+            {
+                Debug.LogWarning("[OpenShop] PanelTransitionHandle not found in scene!");
+            }
         }
         else
         {
@@ -92,23 +110,28 @@ public class OpenShopState : GameState
     /// </summary>
     private void OnItemPurchased(int slotIndex, IShopItem item)
     {
-        if (isClosing) return;
+        Debug.Log($"[OpenShop] OnItemPurchased called! SlotIndex: {slotIndex}, Item: {item.GetName()}, isClosing: {isClosing}");
+        
+        if (isClosing)
+        {
+            Debug.Log("[OpenShop] Already closing, ignoring duplicate purchase event");
+            return;
+        }
         
         isClosing = true;
         Debug.Log($"[OpenShop] Item purchased: {item.GetName()}. Closing shop after animation...");
         
-        // Trigger hide animation via ShopManager event
-        if (manager.ShopManager != null)
-        {
-            manager.ShopManager.HideShop();
-        }
-        
-        // Find PanelTransitionHandle and subscribe to completion event
+        // Find PanelTransitionHandle and call Hide directly
         var panelTransition = Object.FindFirstObjectByType<PanelTransitionHandle>();
         if (panelTransition != null)
         {
-            // Subscribe to hide complete event
+            Debug.Log("[OpenShop] Found PanelTransitionHandle, calling Hide() and subscribing to OnHideComplete");
+            
+            // Subscribe to hide complete event first
             panelTransition.OnHideComplete += OnPanelHideComplete;
+            
+            // Then trigger the hide animation
+            panelTransition.Hide();
         }
         else
         {
@@ -148,21 +171,22 @@ public class OpenShopState : GameState
         isClosing = true;
         Debug.Log("[OpenShop] Close button clicked. Closing shop with animation...");
         
-        // Trigger hide animation
-        if (manager.ShopManager != null)
-        {
-            manager.ShopManager.HideShop();
-        }
-        
-        // Subscribe to animation complete
+        // Find PanelTransitionHandle and call Hide directly
         var panelTransition = Object.FindFirstObjectByType<PanelTransitionHandle>();
         if (panelTransition != null)
         {
+            Debug.Log("[OpenShop] Found PanelTransitionHandle, calling Hide() and subscribing to OnHideComplete");
+            
+            // Subscribe to hide complete event first
             panelTransition.OnHideComplete += OnPanelHideComplete;
+            
+            // Then trigger the hide animation
+            panelTransition.Hide();
         }
         else
         {
             // Fallback: transition immediately
+            Debug.LogWarning("[OpenShop] PanelTransitionHandle not found! Transitioning immediately.");
             manager.TransitionToRollDice();
         }
     }
