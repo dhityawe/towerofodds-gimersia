@@ -47,7 +47,6 @@ namespace TowerOfOdds.Manager
     {
         [Header("Wave Settings")]
         [SerializeField] private int currentWave = 0;
-        [SerializeField] private float timeBetweenWaves = 10f;
         
         [Header("Current Wave Info")]
         [SerializeField] private WaveData currentWaveData;
@@ -62,7 +61,6 @@ namespace TowerOfOdds.Manager
         [SerializeField] private float enemySpawnScaling = 0.05f;    // +0.05 per wave
 
         private EnemySpawner enemySpawner;
-        private float timeSinceWaveEnd;
         private bool gameActive = true;
 
         public event Action<int> OnWaveStart;
@@ -80,7 +78,7 @@ namespace TowerOfOdds.Manager
                 Debug.LogError("EnemySpawner component not found on WaveManager!");
             }
 
-            StartNextWave();
+            // Don't auto-start wave - GameStateManager controls this
         }
 
         private void Update()
@@ -94,15 +92,6 @@ namespace TowerOfOdds.Manager
                 if (waveTimer >= currentWaveData.duration)
                 {
                     EndWave();
-                }
-            }
-            else
-            {
-                // Countdown between waves
-                timeSinceWaveEnd += Time.deltaTime;
-                if (timeSinceWaveEnd >= timeBetweenWaves)
-                {
-                    StartNextWave();
                 }
             }
         }
@@ -133,7 +122,6 @@ namespace TowerOfOdds.Manager
         private void EndWave()
         {
             waveActive = false;
-            timeSinceWaveEnd = 0f;
 
             Debug.Log($"=== WAVE {currentWave} COMPLETE ===");
             OnWaveComplete?.Invoke(currentWave);
@@ -199,12 +187,6 @@ namespace TowerOfOdds.Manager
         {
             if (!waveActive || currentWaveData == null) return 0f;
             return waveTimer / currentWaveData.duration;
-        }
-
-        public float GetTimeBetweenWavesProgress()
-        {
-            if (waveActive) return 0f;
-            return timeSinceWaveEnd / timeBetweenWaves;
         }
     }
 }

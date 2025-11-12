@@ -6,7 +6,7 @@ using UnityEngine;
 
 /// <summary>
 /// Manages the game flow state machine.
-/// Flow: Start → RollDice → StartWave → (HP Check) → End OR OpenShop → (loop)
+/// Flow: Intro → CheckWave (Shop at 0) → RollDice → StartWave → WaveActive → CheckWave → (Shop every 5) → Loop
 /// </summary>
 public class GameStateManager : MonoBehaviour
 {
@@ -41,6 +41,7 @@ public class GameStateManager : MonoBehaviour
 
     // State instances
     private GameState currentState;
+    private IntroState introState;
     private RollDiceState rollDiceState;
     private StartWaveState startWaveState;
     private WaveActiveState waveActiveState;
@@ -82,6 +83,7 @@ public class GameStateManager : MonoBehaviour
         }
 
         // Initialize states
+        introState = new IntroState(this);
         rollDiceState = new RollDiceState(this);
         startWaveState = new StartWaveState(this);
         waveActiveState = new WaveActiveState(this);
@@ -98,8 +100,8 @@ public class GameStateManager : MonoBehaviour
 
     void Start()
     {
-        // Start game flow
-        ChangeState(rollDiceState);
+        // Start game flow with intro
+        ChangeState(introState);
     }
 
     void Update()
@@ -137,6 +139,16 @@ public class GameStateManager : MonoBehaviour
     #endregion
 
     #region State Trasition
+
+    public void TransitionToIntro()
+    {
+        ChangeState(introState);
+    }
+
+    public void TransitionToCheckWave()
+    {
+        ChangeState(checkWaveCompleteState);
+    }
 
     public void TransitionToRollDice()
     {
@@ -195,7 +207,7 @@ public class GameStateManager : MonoBehaviour
 
     public bool ShouldOpenShop()
     {
-        // Open shop every 5 waves (kelipatan 5)
+        // Open shop at wave 0 (after intro) and every 5 waves (5, 10, 15, etc.)
         return currentWave % maxWaveKelipatan == 0;
     }
 
@@ -209,7 +221,7 @@ public class GameStateManager : MonoBehaviour
             playerTower.ResetToDefault();
         }
 
-        TransitionToRollDice();
+        TransitionToIntro();
     }
     #endregion
 

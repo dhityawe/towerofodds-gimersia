@@ -26,5 +26,5 @@ MonoBehaviour:
   speedUpPerRoll: 0.03
   buffDuration: 0.75
   attackRange: 15
-  projectilePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 2519224685799641957, guid: 1be0a927f820abd4f9cf4ebc6f0bb21a, type: 3}
   projectileSpeed: 25

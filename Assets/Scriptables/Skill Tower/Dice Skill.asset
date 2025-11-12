@@ -18,8 +18,13 @@ MonoBehaviour:
   cost: 100
   rarity: 0
   baseDamage: 15
+  hitSound: {fileID: 0}
+  hitSoundVolume: 1
+  maxLevel: 5
+  damageIncreasePerLevel: 10
+  currentLevel: 1
   speedUpPerRoll: 0.03
   buffDuration: 0.75
   attackRange: 5
-  projectilePrefab: {fileID: 2613932928995288591, guid: 88ff338d02f5f574c8e9df4af4378225, type: 3}
+  projectilePrefab: {fileID: 2519224685799641957, guid: 1be0a927f820abd4f9cf4ebc6f0bb21a, type: 3}
   projectileSpeed: 10

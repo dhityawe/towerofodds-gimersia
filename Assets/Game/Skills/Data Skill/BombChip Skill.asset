@@ -24,9 +24,9 @@ MonoBehaviour:
   damageIncreasePerLevel: 10
   currentLevel: 1
   attackRange: 15
-  bombChipPrefab: {fileID: 0}
+  bombChipPrefab: {fileID: 5393482838239930523, guid: 508b42859cf12ff439054180b5020441, type: 3}
   projectileSpeed: 15
   explosionRadius: 2.5
-  explosionEffectPrefab: {fileID: 0}
+  explosionEffectPrefab: {fileID: 7491476872070769254, guid: efd129fcf31c6ff4cb3140a2af187563, type: 3}
   explosionDuration: 0.3
   skillCooldown: 0

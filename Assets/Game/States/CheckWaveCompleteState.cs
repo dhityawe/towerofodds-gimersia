@@ -17,13 +17,24 @@ public class CheckWaveCompleteState : GameState
     {
         Debug.Log($"[CheckWaveComplete] Checking wave {manager.CurrentWave} completion...");
 
-        // Notify wave complete event
-        manager.NotifyWaveComplete();
+        // Disable tower combat after wave ends
+        if (manager.PlayerTower != null)
+        {
+            manager.PlayerTower.enabled = false;
+            Debug.Log("[CheckWaveComplete] Tower combat disabled");
+        }
 
-        // Reward chips for wave completion
-        PlayerDataManager.Instance.RewardWaveComplete(baseReward: 50, manager.CurrentWave);
+        // Only reward chips if wave > 0 (not after intro)
+        if (manager.CurrentWave > 0)
+        {
+            // Notify wave complete event
+            manager.NotifyWaveComplete();
 
-        // Check tower HP
+            // Reward chips for wave completion
+            PlayerDataManager.Instance.RewardWaveComplete(baseReward: 50, manager.CurrentWave);
+        }
+
+        // Check tower HP and decide next action
         CheckTowerStatus();
     }
 
@@ -41,7 +52,7 @@ public class CheckWaveCompleteState : GameState
         }
 
         // Check if tower is dead
-        if (manager.PlayerTower.IsDead())
+        if (manager.PlayerTower != null && manager.PlayerTower.IsDead())
         {
             Debug.Log("[CheckWaveComplete] Tower HP = 0. Game Over!");
             manager.TransitionToGameOver();
@@ -49,9 +60,10 @@ public class CheckWaveCompleteState : GameState
         }
 
         // Tower is alive, check if should open shop
+        // Shop opens at wave 0 (after intro) and every 5 waves (5, 10, 15, etc.)
         if (manager.ShouldOpenShop())
         {
-            Debug.Log($"[CheckWaveComplete] Wave {manager.CurrentWave} (kelipatan {manager.MaxWaveKelipatan}). Opening shop!");
+            Debug.Log($"[CheckWaveComplete] Wave {manager.CurrentWave} - Opening shop!");
             manager.TransitionToOpenShop();
         }
         else

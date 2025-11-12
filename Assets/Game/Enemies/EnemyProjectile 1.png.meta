@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 4d89e764b26b1eb4e81c8f9014dd8ee2
+guid: a84d1e39e501ace4ca126b8e8b98bf18
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3763291096290993652
-    second: ShieldDefault_0
+      213: 214336070173463777
+    second: EnemyProjectile 1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ShieldDefault_0
+      name: EnemyProjectile 1_0
       rect:
         serializedVersion: 2
-        x: 10
-        y: 1
-        width: 80
-        height: 98
+        x: 0
+        y: 0
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4f5a0d43055e93430800000000000000
-      internalID: 3763291096290993652
+      spriteID: 1e41e3d258979f200800000000000000
+      internalID: 214336070173463777
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      ShieldDefault_0: 3763291096290993652
+      EnemyProjectile 1_0: 214336070173463777
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

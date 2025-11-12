@@ -17,6 +17,7 @@ public class ShopUI : MonoBehaviour
 
     [Header("UI Panels")]
     [SerializeField] private GameObject shopPanel;
+    [SerializeField] private Button continueButton;
     [SerializeField] private TextMeshProUGUI errorMessageText;
 
     [System.Serializable]
@@ -37,6 +38,8 @@ public class ShopUI : MonoBehaviour
     {
         if (shopManager != null)
         {
+            shopManager.OnShowShop += OnShowShop;
+            shopManager.OnHideShop += OnHideShop;
             shopManager.OnShopRefreshed += OnShopRefreshed;
             shopManager.OnItemPurchased += OnItemPurchased;
             shopManager.OnPurchaseFailed += OnPurchaseFailed;
@@ -47,6 +50,8 @@ public class ShopUI : MonoBehaviour
     {
         if (shopManager != null)
         {
+            shopManager.OnShowShop -= OnShowShop;
+            shopManager.OnHideShop -= OnHideShop;
             shopManager.OnShopRefreshed -= OnShopRefreshed;
             shopManager.OnItemPurchased -= OnItemPurchased;
             shopManager.OnPurchaseFailed -= OnPurchaseFailed;
@@ -60,6 +65,12 @@ public class ShopUI : MonoBehaviour
         {
             int slotIndex = i; // Capture for lambda
             slotUIs[i].purchaseButton?.onClick.AddListener(() => OnPurchaseButtonClicked(slotIndex));
+        }
+
+        // Wire up continue button
+        if (continueButton != null)
+        {
+            continueButton.onClick.AddListener(OnContinueButtonClicked);
         }
 
         // Hide shop initially
@@ -94,6 +105,16 @@ public class ShopUI : MonoBehaviour
     private void OnShopRefreshed(ShopManager.ShopSlot[] slots)
     {
         RefreshUI();
+    }
+
+    private void OnShowShop()
+    {
+        OpenShop();
+    }
+
+    private void OnHideShop()
+    {
+        CloseShop();
     }
 
     private void RefreshUI()
@@ -163,6 +184,24 @@ public class ShopUI : MonoBehaviour
     private void OnPurchaseButtonClicked(int slotIndex)
     {
         shopManager?.PurchaseItem(slotIndex);
+    }
+
+    private void OnContinueButtonClicked()
+    {
+        Debug.Log("[ShopUI] Continue button clicked. Closing shop...");
+        
+        // Find OpenShopState and tell it to close
+        var gameStateManager = GameStateManager.Instance;
+        if (gameStateManager != null && gameStateManager.CurrentState is OpenShopState openShopState)
+        {
+            openShopState.CloseShop();
+        }
+        else
+        {
+            Debug.LogWarning("[ShopUI] Could not find OpenShopState to close shop!");
+            // Fallback: just hide the panel
+            CloseShop();
+        }
     }
 
     private void OnItemPurchased(int slotIndex, IShopItem item)

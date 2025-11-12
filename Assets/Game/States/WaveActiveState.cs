@@ -2,15 +2,17 @@
 // State: Wave is in progress, enemies are spawning/attacking
 
 using UnityEngine;
+using TowerOfOdds.Manager;
 
 /// <summary>
 /// Wave Active State: Enemies are spawning and attacking the tower.
-/// Checks for wave completion or tower death.
-/// Transition: To CheckWaveComplete when all enemies defeated, or GameOver if tower dies.
+/// Monitors WaveManager for wave completion (duration-based).
+/// Transition: To CheckWaveComplete when wave duration ends, or GameOver if tower dies.
 /// </summary>
 public class WaveActiveState : GameState
 {
     private bool waveComplete;
+    private WaveManager waveManager;
 
     public WaveActiveState(GameStateManager manager) : base(manager) { }
 
@@ -19,46 +21,52 @@ public class WaveActiveState : GameState
         waveComplete = false;
         Debug.Log($"[WaveActive] Wave {manager.CurrentWave} in progress...");
 
-        // TODO: Monitor enemy count from wave spawner
+        // Find WaveManager if not cached
+        if (waveManager == null)
+        {
+            waveManager = Object.FindFirstObjectByType<WaveManager>();
+            if (waveManager == null)
+            {
+                Debug.LogError("[WaveActive] WaveManager not found in scene!");
+                return;
+            }
+        }
+
+        // Subscribe to wave completion event
+        waveManager.OnWaveComplete -= OnWaveCompleted;
+        waveManager.OnWaveComplete += OnWaveCompleted;
     }
 
     public override void OnUpdate()
     {
-        // Check if tower is dead (handled by event in GameStateManager)
-        // Check if wave is complete
-        if (IsWaveComplete() && !waveComplete)
-        {
-            waveComplete = true;
-            manager.TransitionToCheckWaveComplete();
-        }
+        // Tower death is handled by event in GameStateManager
+        // Wave completion is handled by WaveManager.OnWaveComplete event
     }
 
     public override void OnExit()
     {
         Debug.Log($"[WaveActive] Wave {manager.CurrentWave} activity ended");
+        
+        // Unsubscribe from events
+        if (waveManager != null)
+        {
+            waveManager.OnWaveComplete -= OnWaveCompleted;
+        }
     }
 
     public override string GetStateName() => "Wave Active";
 
-    // ====== HELPERS ======
-
-    private bool IsWaveComplete()
-    {
-        // TODO: Check with wave spawner if all enemies are defeated
-        // return waveSpawner.AllEnemiesDefeated();
-
-        // TEMP: Auto-complete after 5 seconds for testing
-        return Time.time > 5f; // Replace with real condition
-    }
+    // ====== EVENT HANDLERS ======
 
     /// <summary>
-    /// Called externally when wave spawner confirms all enemies defeated.
+    /// Called by WaveManager when wave duration ends.
     /// </summary>
-    public void NotifyWaveComplete()
+    private void OnWaveCompleted(int waveNumber)
     {
         if (!waveComplete)
         {
             waveComplete = true;
+            Debug.Log($"[WaveActive] Wave {waveNumber} completed by WaveManager");
             manager.TransitionToCheckWaveComplete();
         }
     }

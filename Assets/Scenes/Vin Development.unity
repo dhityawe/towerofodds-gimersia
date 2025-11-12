@@ -294,8 +294,8 @@ MonoBehaviour:
       tankPercent: 0
   waveTimer: 0
   waveActive: 0
-  baseDuration: 20
-  durationIncrement: 2
+  baseDuration: 10
+  durationIncrement: 0.5
   maxDuration: 90
   baseEnemiesPerSecond: 0.5
   enemySpawnScaling: 0.05
@@ -940,9 +940,8 @@ MonoBehaviour:
   baseAttackCount: 1
   baseAttackSpeed: 1
   skillSlots:
-  - {fileID: 11400000, guid: 2664a643dcfcf374d8dd736f557e7bba, type: 2}
-  - {fileID: 11400000, guid: d08cdd6b3575d8548addfbb75dbc985f, type: 2}
-  - {fileID: 11400000, guid: 2983bd48d759b524fb96bb3831de8950, type: 2}
+  - {fileID: 11400000, guid: 3ebf3d48d4d7b2b459fdeed0d3a86359, type: 2}
+  - {fileID: 11400000, guid: 3ebf3d48d4d7b2b459fdeed0d3a86359, type: 2}
   currentHp: 0
   isDead: 0
 --- !u!212 &1378166494

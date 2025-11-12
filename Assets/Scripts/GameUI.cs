@@ -123,11 +123,11 @@ namespace TowerOfOdds.UI
 
             if (!waveManager.IsWaveActive)
             {
-                float progress = waveManager.GetTimeBetweenWavesProgress();
-                float timeRemaining = (1f - progress) * 10f; // timeBetweenWaves = 10s
+                // float progress = waveManager.GetTimeBetweenWavesProgress();
+                // float timeRemaining = (1f - progress) * 10f; // timeBetweenWaves = 10s
                 
-                nextWaveTimerText.text = $"Next Wave in: {timeRemaining:F1}s";
-                nextWaveTimerText.gameObject.SetActive(true);
+                // nextWaveTimerText.text = $"Next Wave in: {timeRemaining:F1}s";
+                // nextWaveTimerText.gameObject.SetActive(true);
             }
             else
             {

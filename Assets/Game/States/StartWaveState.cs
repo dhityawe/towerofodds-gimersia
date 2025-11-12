@@ -2,9 +2,10 @@
 // State: Initialize and start the wave
 
 using UnityEngine;
+using TowerOfOdds.Manager;
 
 /// <summary>
-/// Start Wave State: Increment wave counter and begin spawning enemies.
+/// Start Wave State: Increment wave counter, activate tower/enemies, and begin wave.
 /// Transition: Automatically to WaveActive after initialization.
 /// </summary>
 public class StartWaveState : GameState
@@ -18,12 +19,36 @@ public class StartWaveState : GameState
 
         Debug.Log($"[StartWave] Starting Wave {manager.CurrentWave}");
 
-        // TODO: Initialize wave spawner with current wave number and dice results
-        // waveSpawner.StartWave(manager.CurrentWave, DiceResult.Instance.Dice1, DiceResult.Instance.Dice2);
+        // Enable tower and enemies (they were inactive before this state)
+        EnableGameplay();
+
+        // Start wave via WaveManager
+        WaveManager waveManager = Object.FindFirstObjectByType<WaveManager>();
+        if (waveManager != null)
+        {
+            waveManager.StartNextWave();
+        }
+        else
+        {
+            Debug.LogWarning("[StartWave] WaveManager not found!");
+        }
 
         // Transition to wave active
         manager.TransitionToWaveActive();
     }
 
     public override string GetStateName() => "Start Wave";
+
+    private void EnableGameplay()
+    {
+        // Enable tower combat
+        if (manager.PlayerTower != null)
+        {
+            manager.PlayerTower.enabled = true;
+            Debug.Log("[StartWave] Tower combat enabled");
+        }
+
+        // Enable enemy spawning/movement
+        // (Enemies will be spawned by WaveManager)
+    }
 }

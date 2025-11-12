@@ -17,12 +17,16 @@ public class RollDiceState : GameState
     private GameObject dicePanel;
     private Button nextWaveButton;
     private bool hasCompletedAllRolls;
+    private float delayTimer = 0f;
+    private bool isWaitingForDelay = false;
 
     public RollDiceState(GameStateManager manager) : base(manager) { }
 
     public override void OnEnter()
     {
         hasCompletedAllRolls = false;
+        isWaitingForDelay = false;
+        delayTimer = 0f;
         Debug.Log("[RollDice] Entering dice roll state...");
 
         // Find DiceRollUI
@@ -81,6 +85,19 @@ public class RollDiceState : GameState
     public override void OnUpdate()
     {
         // UI handles all input and rolling logic
+        
+        // Check if we're waiting for delay after all rolls complete
+        if (isWaitingForDelay)
+        {
+            delayTimer += Time.deltaTime;
+            
+            if (delayTimer >= 5f)
+            {
+                Debug.Log("[RollDice] 5 second delay complete. Auto-transitioning to StartWave...");
+                isWaitingForDelay = false;
+                manager.TransitionToStartWave();
+            }
+        }
     }
 
     public override void OnExit()
@@ -125,9 +142,13 @@ public class RollDiceState : GameState
         if (hasCompletedAllRolls) return;
         
         hasCompletedAllRolls = true;
-        Debug.Log("[RollDice] All rolls completed. Showing Next Wave button...");
+        Debug.Log("[RollDice] All rolls completed. Starting 5 second delay before wave starts...");
         
-        // Show Next Wave button instead of auto-transitioning
+        // Start 5 second delay timer
+        isWaitingForDelay = true;
+        delayTimer = 0f;
+        
+        // Show Next Wave button (optional - player can click to skip delay)
         if (nextWaveButton != null)
         {
             nextWaveButton.gameObject.SetActive(true);
@@ -136,17 +157,12 @@ public class RollDiceState : GameState
             nextWaveButton.transform.localScale = Vector3.zero;
             nextWaveButton.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
             
-            // Optional: Update button text
+            // Update button text to show it can skip
             var buttonText = nextWaveButton.GetComponentInChildren<TextMeshProUGUI>();
             if (buttonText != null)
             {
-                buttonText.text = "START WAVE";
+                buttonText.text = "START WAVE (or wait 5s)";
             }
-        }
-        else
-        {
-            Debug.LogWarning("[RollDice] Next Wave button not found! Auto-transitioning...");
-            manager.TransitionToStartWave();
         }
     }
     
@@ -155,7 +171,8 @@ public class RollDiceState : GameState
     /// </summary>
     private void OnNextWaveClicked()
     {
-        Debug.Log("[RollDice] Next Wave button clicked. Transitioning to StartWave...");
+        Debug.Log("[RollDice] Next Wave button clicked. Skipping delay and transitioning to StartWave...");
+        isWaitingForDelay = false; // Cancel the delay
         manager.TransitionToStartWave();
     }
 }
