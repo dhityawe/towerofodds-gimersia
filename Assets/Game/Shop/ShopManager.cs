@@ -204,14 +204,24 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     public bool PurchaseItem(int slotIndex)
     {
+        Debug.Log($"[ShopManager] PurchaseItem called for slot {slotIndex}");
+        
         // Validate slot index
         if (slotIndex < 0 || slotIndex >= SHOP_SLOT_COUNT)
         {
-            Debug.LogError($"Invalid slot index: {slotIndex}");
+            Debug.LogError($"[ShopManager] Invalid slot index: {slotIndex}");
             return false;
         }
 
         ShopSlot slot = currentSlots[slotIndex];
+        
+        if (slot == null || slot.item == null)
+        {
+            Debug.LogError($"[ShopManager] Slot {slotIndex} is null or has no item!");
+            return false;
+        }
+        
+        Debug.Log($"[ShopManager] Attempting to purchase: {slot.item.GetName()}, Type: {slot.item.GetType().Name}");
 
         // Check if already purchased
         if (slot.isPurchased)
@@ -242,7 +252,9 @@ public class ShopManager : MonoBehaviour
         }
 
         // Attempt purchase
+        Debug.Log($"[ShopManager] Calling OnPurchase for {slot.item.GetName()}...");
         bool success = slot.item.OnPurchase(playerTower);
+        Debug.Log($"[ShopManager] OnPurchase returned: {success}");
 
         if (success)
         {
@@ -251,13 +263,14 @@ public class ShopManager : MonoBehaviour
 
             slot.isPurchased = true;
             OnItemPurchased?.Invoke(slotIndex, slot.item);
-            Debug.Log($"Successfully purchased {slot.item.GetName()} for {cost} chips");
+            Debug.Log($"[ShopManager] Successfully purchased {slot.item.GetName()} for {cost} chips");
             return true;
         }
         else
         {
             string msg = $"Purchase failed for {slot.item.GetName()}";
             OnPurchaseFailed?.Invoke(msg);
+            Debug.LogError($"[ShopManager] {msg}");
             return false;
         }
     }

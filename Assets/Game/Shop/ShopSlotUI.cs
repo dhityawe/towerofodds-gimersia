@@ -231,9 +231,30 @@ public class ShopSlotUI : MonoBehaviour
     /// </summary>
     private void OnPurchaseClicked()
     {
+        Debug.Log($"[ShopSlotUI {slotIndex}] Purchase button clicked!");
+        
+        if (currentSlot == null)
+        {
+            Debug.LogError($"[ShopSlotUI {slotIndex}] currentSlot is NULL!");
+            return;
+        }
+        
+        if (currentSlot.item == null)
+        {
+            Debug.LogError($"[ShopSlotUI {slotIndex}] currentSlot.item is NULL!");
+            return;
+        }
+        
+        Debug.Log($"[ShopSlotUI {slotIndex}] Calling ShopManager.PurchaseItem({slotIndex}) for item: {currentSlot.item.GetName()}, Type: {currentSlot.item.GetType().Name}");
+        
         if (shopManager != null)
         {
-            shopManager.PurchaseItem(slotIndex);
+            bool success = shopManager.PurchaseItem(slotIndex);
+            Debug.Log($"[ShopSlotUI {slotIndex}] Purchase result: {success}");
+        }
+        else
+        {
+            Debug.LogError($"[ShopSlotUI {slotIndex}] ShopManager is NULL!");
         }
     }
 

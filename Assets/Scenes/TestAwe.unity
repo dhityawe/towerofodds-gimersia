@@ -3219,7 +3219,7 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 4
+  m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
   m_CellSize: {x: 20, y: 20}
@@ -3529,9 +3529,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edd14e14fdeacf74c8160c8bbacb8b19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseHp: 300
+  baseHp: 500
   baseArmor: 5
-  baseHpRegen: 1
+  baseHpRegen: 5
   baseAttackCount: 1
   baseAttackSpeed: 1
   skillSlots:
@@ -9583,6 +9583,7 @@ GameObject:
   - component: {fileID: 2004274449}
   - component: {fileID: 2004274448}
   - component: {fileID: 2004274447}
+  - component: {fileID: 2004274450}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -9640,6 +9641,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2004274450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2004274446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f89a067131598e45baa8ab4fff77844, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameplaySceneName: Gameplay
+  mainMenuSceneName: Gameplay
+  useAsyncLoading: 0
+  restartDelay: 0
 --- !u!1 &2014619533
 GameObject:
   m_ObjectHideFlags: 0

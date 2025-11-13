@@ -116,26 +116,63 @@ public abstract class TowerItem : ScriptableObject, IShopItem
 
     public virtual bool OnPurchase(TowerRuntime tower)
     {
-        // Check if this item supports stacking and already has stacks
-        if (maxStack > 0 && currentStack > 0)
+        Debug.Log($"[TowerItem] OnPurchase called for {itemName}. maxStack: {maxStack}");
+        
+        // Check if tower already has this item (for stacking logic)
+        TowerItem existingItem = FindExistingItemInTower(tower);
+        
+        if (existingItem != null && maxStack > 0)
         {
-            // Stack it up
-            return StackUp(tower);
-        }
-        else if (maxStack > 0 && currentStack == 0)
-        {
-            // First purchase of stackable item
-            currentStack = 1;
-            ApplyEffect(tower);
-            Debug.Log($"Purchased {itemName} (Stack: {currentStack}/{maxStack})");
-            return true;
+            // Item already exists and is stackable - stack it up
+            Debug.Log($"[TowerItem] {itemName} already exists in tower inventory. Calling StackUp() on existing item...");
+            return existingItem.StackUp(tower);
         }
         else
         {
-            // One-time use item (maxStack = 0)
-            ApplyEffect(tower);
-            Debug.Log($"Purchased and applied {itemName}");
-            return true;
+            // First purchase or non-stackable item
+            // IMPORTANT: Create an instance copy to avoid modifying the ScriptableObject asset
+            TowerItem instance = Instantiate(this);
+            
+            if (instance.maxStack > 0)
+            {
+                instance.currentStack = 1;
+                Debug.Log($"[TowerItem] {instance.itemName} is stackable, set currentStack to 1");
+            }
+            
+            // Add to tower's inventory (this will call ApplyEffect)
+            Debug.Log($"[TowerItem] Calling tower.AddItem({instance.itemName})...");
+            bool added = tower.AddItem(instance);
+            
+            if (added)
+            {
+                Debug.Log($"[TowerItem] Successfully purchased {instance.itemName}" + (instance.maxStack > 0 ? $" (Stack: {instance.currentStack}/{instance.maxStack})" : ""));
+            }
+            else
+            {
+                Debug.LogError($"[TowerItem] Failed to add {instance.itemName} to tower inventory!");
+            }
+            
+            return added;
         }
+    }
+    
+    /// <summary>
+    /// Find an existing instance of this item in the tower's inventory.
+    /// Compares by itemName to identify the same item type.
+    /// </summary>
+    private TowerItem FindExistingItemInTower(TowerRuntime tower)
+    {
+        var allItems = tower.GetAllItems();
+        foreach (var item in allItems)
+        {
+            if (item != null && item.itemName == this.itemName)
+            {
+                Debug.Log($"[TowerItem] Found existing {itemName} in tower inventory!");
+                return item;
+            }
+        }
+        
+        Debug.Log($"[TowerItem] No existing {itemName} found in tower inventory.");
+        return null;
     }
 }

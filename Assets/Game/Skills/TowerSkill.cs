@@ -148,6 +148,8 @@ public abstract class TowerSkill : ScriptableObject, IShopItem
 
     public virtual bool OnPurchase(TowerRuntime tower)
     {
+        Debug.Log($"[TowerSkill] OnPurchase called for {skillName}. currentLevel: {currentLevel}");
+        
         // Check if skill is already equipped (upgrade path)
         int equippedSlot = GetEquippedSlotIndex(tower);
         
@@ -157,12 +159,12 @@ public abstract class TowerSkill : ScriptableObject, IShopItem
             if (CanLevelUp())
             {
                 LevelUp();
-                Debug.Log($"Upgraded {skillName} to level {currentLevel}!");
+                Debug.Log($"[TowerSkill] Upgraded {skillName} to level {currentLevel}!");
                 return true;
             }
             else
             {
-                Debug.LogWarning($"{skillName} is already at max level!");
+                Debug.LogWarning($"[TowerSkill] {skillName} is already at max level!");
                 return false;
             }
         }
@@ -171,12 +173,12 @@ public abstract class TowerSkill : ScriptableObject, IShopItem
         int emptySlot = tower.GetFirstEmptySlot();
         if (emptySlot == -1)
         {
-            Debug.LogWarning($"Cannot purchase {skillName}: All skill slots are full!");
+            Debug.LogWarning($"[TowerSkill] Cannot purchase {skillName}: All skill slots are full!");
             return false;
         }
 
         tower.EquipSkill(this, emptySlot);
-        Debug.Log($"Purchased and equipped {skillName} to slot {emptySlot}");
+        Debug.Log($"[TowerSkill] Purchased and equipped {skillName} to slot {emptySlot}");
         return true;
     }
 

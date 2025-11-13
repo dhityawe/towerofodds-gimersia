@@ -10,15 +10,20 @@ using UnityEngine;
 /// </summary>
 public class OpenShopState : GameState
 {
-    private ShopType shopType;
+    private ShopType shopType = ShopType.Skills; // Default to Skills
     private bool isClosing = false;
+    private bool shopTypeSetExternally = false; // Track if shopType was set before OnEnter
 
     public OpenShopState(GameStateManager manager) : base(manager) { }
 
     public override void OnEnter()
     {
-        // Default to Skills shop if not specified
-        shopType = ShopType.Skills;
+        // Only set default if shopType wasn't already set externally
+        if (!shopTypeSetExternally)
+        {
+            shopType = ShopType.Skills;
+        }
+        
         isClosing = false;
         
         // Subscribe to purchase events
@@ -34,6 +39,9 @@ public class OpenShopState : GameState
         }
         
         OpenShop(shopType);
+        
+        // Reset flag after opening
+        shopTypeSetExternally = false;
     }
 
     /// <summary>
@@ -42,6 +50,7 @@ public class OpenShopState : GameState
     public void OpenShop(ShopType type)
     {
         shopType = type;
+        shopTypeSetExternally = true; // Mark that shop type was set externally
         Debug.Log($"[OpenShop] {shopType} Shop is now open!");
 
         // Refresh shop with specific type

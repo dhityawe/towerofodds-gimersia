@@ -15,11 +15,11 @@ MonoBehaviour:
   enemyType: 1
   enemyName: Ranged
   description: 
-  maxHealth: 25
-  attackDamage: 10
+  maxHealth: 20
+  attackDamage: 15
   attackRange: 2.5
   attackCooldown: 1.5
-  moveSpeed: 2
+  moveSpeed: 0.5
   preferredDistance: 1.5
   damageReduction: 0
   projectilePrefab: {fileID: 2613932928995288591, guid: 88ff338d02f5f574c8e9df4af4378225, type: 3}

@@ -16,10 +16,10 @@ MonoBehaviour:
   enemyName: Tank
   description: 
   maxHealth: 100
-  attackDamage: 25
+  attackDamage: 15
   attackRange: 1.5
   attackCooldown: 2
-  moveSpeed: 0.7
+  moveSpeed: 0.2
   preferredDistance: 1
   damageReduction: 0.202
   projectilePrefab: {fileID: 2613932928995288591, guid: 88ff338d02f5f574c8e9df4af4378225, type: 3}

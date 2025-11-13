@@ -429,8 +429,11 @@ public class TowerRuntime : MonoBehaviour
             {
                 itemSlots[i] = item;
                 item.ApplyEffect(this);
+                
+                Debug.Log($"[TowerRuntime] Item added to slot {i}: {item.GetName()}. Firing OnItemAdded event...");
                 OnItemAdded?.Invoke(i, item);
-                Debug.Log($"[TowerRuntime] Item added to slot {i}: {item.GetName()}");
+                Debug.Log($"[TowerRuntime] OnItemAdded event fired. Subscribers: {(OnItemAdded != null ? OnItemAdded.GetInvocationList().Length : 0)}");
+                
                 return true;
             }
         }

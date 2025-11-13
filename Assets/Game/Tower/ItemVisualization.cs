@@ -47,6 +47,11 @@ public class ItemVisualization : MonoBehaviour
         {
             towerRuntime.OnItemAdded += OnItemAdded;
             towerRuntime.OnItemRemoved += OnItemRemoved;
+            Debug.Log("[ItemVisualization] Subscribed to TowerRuntime item events");
+        }
+        else
+        {
+            Debug.LogWarning("[ItemVisualization] TowerRuntime is null, cannot subscribe to events!");
         }
 
         if (autoRefreshOnStart)
@@ -69,13 +74,20 @@ public class ItemVisualization : MonoBehaviour
     /// </summary>
     private void OnItemAdded(int slotIndex, TowerItem item)
     {
-        if (item == null) return;
+        Debug.Log($"[ItemVisualization] OnItemAdded event received! Slot: {slotIndex}, Item: {(item != null ? item.GetName() : "NULL")}");
+        
+        if (item == null)
+        {
+            Debug.LogWarning("[ItemVisualization] Item is null!");
+            return;
+        }
 
         // Remove old icon if exists
         if (spawnedIcons.ContainsKey(slotIndex))
         {
             Destroy(spawnedIcons[slotIndex]);
             spawnedIcons.Remove(slotIndex);
+            Debug.Log($"[ItemVisualization] Removed old icon from slot {slotIndex}");
         }
 
         // Spawn new icon
@@ -100,10 +112,24 @@ public class ItemVisualization : MonoBehaviour
     /// </summary>
     private void SpawnItemIcon(int slotIndex, TowerItem item)
     {
-        if (itemIconPrefab == null || itemInventoryContainer == null) return;
+        Debug.Log($"[ItemVisualization] SpawnItemIcon called - Slot: {slotIndex}, Item: {item.GetName()}");
+        
+        if (itemIconPrefab == null)
+        {
+            Debug.LogError("[ItemVisualization] itemIconPrefab is NULL! Cannot spawn icon.");
+            return;
+        }
+        
+        if (itemInventoryContainer == null)
+        {
+            Debug.LogError("[ItemVisualization] itemInventoryContainer is NULL! Cannot spawn icon.");
+            return;
+        }
 
         GameObject iconObj = Instantiate(itemIconPrefab, itemInventoryContainer);
         iconObj.name = $"ItemIcon_{slotIndex}_{item.GetName()}";
+        
+        Debug.Log($"[ItemVisualization] Icon GameObject instantiated: {iconObj.name}");
 
         // Set the icon sprite
         Image iconImage = iconObj.GetComponent<Image>();
@@ -116,11 +142,11 @@ public class ItemVisualization : MonoBehaviour
         {
             iconImage.sprite = item.icon;
             iconImage.color = Color.white; // Ensure visible
-            Debug.Log($"[ItemVisualization] Icon spawned for slot {slotIndex}: {item.GetName()}");
+            Debug.Log($"[ItemVisualization] Icon spawned successfully for slot {slotIndex}: {item.GetName()}, Sprite: {item.icon.name}");
         }
         else
         {
-            Debug.LogWarning($"[ItemVisualization] No Image component or icon sprite found for {item.GetName()}");
+            Debug.LogWarning($"[ItemVisualization] Failed to set icon! Image component: {(iconImage != null ? "Found" : "NULL")}, Item icon: {(item.icon != null ? item.icon.name : "NULL")}");
         }
 
         // Store reference
