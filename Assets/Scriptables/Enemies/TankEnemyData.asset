@@ -15,7 +15,7 @@ MonoBehaviour:
   enemyType: 2
   enemyName: Tank
   description: 
-  maxHealth: 125
+  maxHealth: 100
   attackDamage: 25
   attackRange: 1.5
   attackCooldown: 2

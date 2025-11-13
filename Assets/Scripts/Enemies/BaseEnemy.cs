@@ -148,6 +148,20 @@ namespace TowerOfOdds.Enemies
                 gameManager.OnEnemyKilled(enemyType);
             }
             
+            // Notify WaveManager that an enemy died
+            TowerOfOdds.Manager.WaveManager waveManager = Object.FindFirstObjectByType<TowerOfOdds.Manager.WaveManager>();
+            if (waveManager != null)
+            {
+                waveManager.OnEnemyDied();
+            }
+            
+            // Increment kill counter in PlayerDataManager
+            PlayerDataManager playerData = PlayerDataManager.Instance;
+            if (playerData != null)
+            {
+                playerData.IncrementKills();
+            }
+            
             Destroy(gameObject, 0.1f);
         }
 

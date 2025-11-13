@@ -21,9 +21,17 @@ namespace TowerOfOdds.Manager
         
         private WaveData currentWave;
         private Coroutine spawnCoroutine;
+        private WaveManager waveManager;
 
         private void Start()
         {
+            // Find WaveManager
+            waveManager = GetComponent<WaveManager>();
+            if (waveManager == null)
+            {
+                waveManager = FindFirstObjectByType<WaveManager>();
+            }
+
             // If no spawn points assigned, create a default circular spawn area
             if (spawnPoints == null || spawnPoints.Length == 0)
             {
@@ -61,6 +69,12 @@ namespace TowerOfOdds.Manager
             }
 
             Debug.Log($"Finished spawning wave. Total spawned: {enemiesSpawned}");
+            
+            // Notify WaveManager that all enemies have been spawned
+            if (waveManager != null)
+            {
+                waveManager.OnAllEnemiesSpawned();
+            }
         }
 
         private void SpawnEnemy()
@@ -83,6 +97,12 @@ namespace TowerOfOdds.Manager
             // Spawn enemy
             GameObject enemy = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
             enemy.name = $"{enemyType}Enemy_{enemiesSpawned}";
+
+            // Notify WaveManager that an enemy spawned
+            if (waveManager != null)
+            {
+                waveManager.OnEnemySpawned();
+            }
 
             Debug.Log($"Spawned {enemyType} enemy at {spawnPosition}");
         }

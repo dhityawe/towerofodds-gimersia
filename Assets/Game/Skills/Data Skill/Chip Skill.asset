@@ -17,7 +17,7 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 9e7ba39517374a24dac54a27c1ce56c2, type: 3}
   cost: 100
   rarity: 0
-  baseDamage: 10
+  baseDamage: 25
   hitSound: {fileID: 8300000, guid: 419ee1b13b207f943a5d50d2e8ffb19a, type: 3}
   hitSoundVolume: 1
   maxLevel: 5
@@ -26,5 +26,5 @@ MonoBehaviour:
   attackRange: 15
   chipProjectilePrefab: {fileID: 3455806435249627182, guid: 05be633d0be0ea14f909d02ee48a7659, type: 3}
   miniChipPrefab: {fileID: 212565723792625127, guid: d807c54692fd56745b9aabfdd9aca034, type: 3}
-  projectileSpeed: 20
+  projectileSpeed: 10
   miniChipDamageMultiplier: 0.5

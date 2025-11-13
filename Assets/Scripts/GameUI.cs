@@ -30,6 +30,7 @@ namespace TowerOfOdds.UI
     private Manager.GameManager gameManager;
     private Manager.WaveManager waveManager;
     private TowerRuntime tower;
+    private GameStateManager gameStateManager;
 
     private void Start()
     {
@@ -37,6 +38,7 @@ namespace TowerOfOdds.UI
         gameManager = Manager.GameManager.Instance;
         waveManager = Object.FindFirstObjectByType<Manager.WaveManager>();
         tower = Object.FindFirstObjectByType<TowerRuntime>();
+        gameStateManager = GameStateManager.Instance;
 
         if (gameManager == null)
             Debug.LogWarning("GameManager not found!");
@@ -44,6 +46,8 @@ namespace TowerOfOdds.UI
             Debug.LogWarning("WaveManager not found!");
         if (tower == null)
             Debug.LogWarning("Tower not found!");
+        if (gameStateManager == null)
+            Debug.LogWarning("GameStateManager not found!");
     }
 
     private void Update()
@@ -70,26 +74,36 @@ namespace TowerOfOdds.UI
         }
     }        private void UpdateWaveInfo()
         {
-            if (waveManager == null) return;
-
-            if (waveNumberText != null)
+            // Use GameStateManager for accurate wave tracking
+            int currentWave = 0;
+            if (gameStateManager != null)
             {
-                waveNumberText.text = $"Wave {waveManager.CurrentWave}";
+                currentWave = gameStateManager.CurrentWave;
+            }
+            else if (waveManager != null)
+            {
+                currentWave = waveManager.CurrentWave;
             }
 
-            if (waveManager.IsWaveActive)
+            // Update wave number text
+            if (waveNumberText != null)
+            {
+                waveNumberText.text = $"Wave {currentWave}";
+            }
+
+            // Update wave progress text - show same format as wave number
+            if (waveProgressText != null)
+            {
+                waveProgressText.text = $"Wave {currentWave}";
+            }
+
+            if (waveManager == null) return;
+
+            // Update progress bar only
+            if (waveManager.IsWaveActive && waveProgressBar != null)
             {
                 float progress = waveManager.GetWaveProgress();
-                
-                if (waveProgressText != null)
-                {
-                    waveProgressText.text = $"Progress: {progress * 100:F0}%";
-                }
-
-                if (waveProgressBar != null)
-                {
-                    waveProgressBar.value = progress;
-                }
+                waveProgressBar.value = progress;
             }
         }
 

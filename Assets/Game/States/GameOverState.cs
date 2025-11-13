@@ -21,11 +21,34 @@ public class GameOverState : GameState
         // Mark player as lost
         PlayerDataManager.Instance.OnPlayerLose();
 
-        // TODO: Show game over UI
-        // gameOverUI.Show();
-
-        // TODO: Display stats (waves survived, chips earned, etc.)
-        // gameOverUI.ShowStats(manager.CurrentWave, PlayerDataManager.Instance.Chips);
+        // Show game over panel with animation
+        if (manager.GameOverPanel != null)
+        {
+            manager.GameOverPanel.SetActive(true);
+            Debug.Log("[GameOver] GameOverPanel activated");
+            
+            // Find and trigger PanelTransitionHandle animation
+            var panelTransition = manager.GameOverPanel.GetComponentInChildren<PanelTransitionHandle>();
+            if (panelTransition == null)
+            {
+                // Try finding it as a sibling or parent
+                panelTransition = Object.FindFirstObjectByType<PanelTransitionHandle>();
+            }
+            
+            if (panelTransition != null)
+            {
+                panelTransition.Show();
+                Debug.Log("[GameOver] Panel show animation triggered");
+            }
+            else
+            {
+                Debug.LogWarning("[GameOver] PanelTransitionHandle not found for GameOver panel!");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[GameOver] GameOverPanel reference is null in GameStateManager!");
+        }
     }
 
     public override void OnUpdate()
@@ -37,8 +60,23 @@ public class GameOverState : GameState
     {
         Debug.Log("[GameOver] Restarting game...");
 
-        // TODO: Hide game over UI
-        // gameOverUI.Hide();
+        // Hide game over panel with animation
+        if (manager.GameOverPanel != null)
+        {
+            var panelTransition = manager.GameOverPanel.GetComponentInChildren<PanelTransitionHandle>();
+            if (panelTransition == null)
+            {
+                panelTransition = Object.FindFirstObjectByType<PanelTransitionHandle>();
+            }
+            
+            if (panelTransition != null)
+            {
+                panelTransition.Hide();
+                Debug.Log("[GameOver] Panel hide animation triggered");
+            }
+            
+            // Note: Panel will be deactivated after hide animation completes (if disableOnHide is true)
+        }
     }
 
     public override string GetStateName() => "Game Over";

@@ -31,6 +31,7 @@ public class GameStateManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private TowerRuntime playerTower;
     [SerializeField] private ShopManager shopManager;
+    [SerializeField] private GameObject gameOverPanel;
 
     [Header("Current State (Read-Only)")]
     [SerializeField] private string currentStateName;
@@ -58,6 +59,7 @@ public class GameStateManager : MonoBehaviour
     // Public accessors
     public TowerRuntime PlayerTower => playerTower;
     public ShopManager ShopManager => shopManager;
+    public GameObject GameOverPanel => gameOverPanel;
     public int CurrentWave => currentWave;
     public int MaxWaveKelipatan => maxWaveKelipatan;
     public GameState CurrentState => currentState;

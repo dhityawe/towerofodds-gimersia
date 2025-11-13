@@ -17,10 +17,10 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 457b4da346baad54db26487f1888b93a, type: 3}
   cost: 100
   rarity: 0
-  baseDamage: 10
+  baseDamage: 20
   hitSound: {fileID: 0}
   hitSoundVolume: 1
-  maxLevel: 5
+  maxLevel: 10
   damageIncreasePerLevel: 10
   currentLevel: 1
   orbitRadius: 2

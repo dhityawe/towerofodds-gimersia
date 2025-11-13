@@ -32,8 +32,10 @@ public class DiceRollUI : MonoBehaviour
 
     [Header("Multiplier Popup (Balatro-style)")]
     [SerializeField] private GameObject multiplierPopupPrefab;
+    [SerializeField] private Transform showResultDiceTransform; // First popup position (at dice result area)
     [SerializeField] private Transform fallbackPopupSpawnPoint;
     [SerializeField] private float popupDelay = 0.3f;
+    [SerializeField] private float popupDurationAtDiceResult = 1f; // How long popup stays at dice result before moving to skill slot
 
     [Header("Settings")]
     [SerializeField] private float delayBetweenRolls = 0.5f; // Delay between skill rolls
@@ -332,16 +334,69 @@ public class DiceRollUI : MonoBehaviour
     {
         float multiplier = TowerBase.GetDiceMultiplier(dice1, dice2);
 
-        // Spawn multiplier popup at skill slot position
-        if (multiplierPopupPrefab != null)
+        if (multiplierPopupPrefab == null)
         {
-            // Determine spawn position based on skill index
-            Transform spawnPos = GetPopupSpawnPosition(skillIndex);
+            Debug.LogError("[DiceRollUI] multiplierPopupPrefab is NULL! Assign the prefab in Inspector.");
+            return;
+        }
+
+        // Stage 1: Spawn popup at ShowResultDice position (dice result area)
+        Transform diceResultPos = showResultDiceTransform != null ? showResultDiceTransform : transform;
+        
+        Debug.Log($"[DiceRollUI] Instantiating popup at DiceResultText position");
+        GameObject popup = Instantiate(multiplierPopupPrefab, transform);
+        popup.SetActive(true); // Ensure it's active
+        
+        // Set the position to match DiceResultText exactly (use RectTransform for UI)
+        RectTransform popupRect = popup.GetComponent<RectTransform>();
+        RectTransform diceResultRect = diceResultPos.GetComponent<RectTransform>();
+        
+        if (popupRect != null && diceResultRect != null)
+        {
+            // Copy all transform properties to match exactly
+            popupRect.anchorMin = diceResultRect.anchorMin;
+            popupRect.anchorMax = diceResultRect.anchorMax;
+            popupRect.anchoredPosition = diceResultRect.anchoredPosition;
+            popupRect.sizeDelta = diceResultRect.sizeDelta;
+            popupRect.pivot = diceResultRect.pivot;
+            popupRect.localScale = Vector3.one; // Will be animated by MultTextEffect
             
-            GameObject popup = Instantiate(multiplierPopupPrefab, spawnPos.position, Quaternion.identity, spawnPos);
+            Debug.Log($"[DiceRollUI] Popup RectTransform copied from DiceResultText - anchoredPosition: {popupRect.anchoredPosition}, scale: {popupRect.localScale}");
+        }
+        else if (popupRect != null)
+        {
+            // Fallback: use world position
+            popupRect.position = diceResultPos.position;
+            Debug.Log($"[DiceRollUI] Popup RectTransform position set to: {popupRect.position}");
+        }
+        else
+        {
+            popup.transform.position = diceResultPos.position;
+            Debug.Log($"[DiceRollUI] Popup transform position set to: {popup.transform.position}");
+        }
+        
+        Debug.Log($"[DiceRollUI] Popup instantiated: {popup.name}, Active: {popup.activeSelf}");
+        
+        // Set text using MultTextEffect component
+        var multEffect = popup.GetComponent<MultTextEffect>();
+        if (multEffect != null)
+        {
+            string skillName = skillIndex >= 0 && towerRuntime != null 
+                ? towerRuntime.GetSkill(skillIndex).GetName()
+                : "";
+                
+            Debug.Log($"[DiceRollUI] Found MultTextEffect, setting text: {skillName} x{multiplier:F1}");
+            multEffect.SetMultiplierText(multiplier, skillName);
+        }
+        else
+        {
+            Debug.LogWarning("[DiceRollUI] No MultTextEffect found, using fallback text setting");
             
-            // Set text if popup has TextMeshProUGUI
-            var popupText = popup.GetComponentInChildren<TextMeshProUGUI>();
+            // Fallback: directly set text if no MultTextEffect component
+            var popupText = popup.GetComponent<TextMeshProUGUI>();
+            if (popupText == null)
+                popupText = popup.GetComponentInChildren<TextMeshProUGUI>();
+                
             if (popupText != null)
             {
                 string skillName = skillIndex >= 0 && towerRuntime != null 
@@ -351,10 +406,32 @@ public class DiceRollUI : MonoBehaviour
                 popupText.text = skillName != "" 
                     ? $"{skillName}\n×{multiplier:F1}"
                     : $"×{multiplier:F1}";
+                    
+                Debug.Log($"[DiceRollUI] Text set directly: {popupText.text}");
             }
-            
-            Debug.Log($"[DiceRollUI] Skill {skillIndex}: ×{multiplier:F1} (Dice: {dice1} + {dice2}) at slot {skillIndex}");
+            else
+            {
+                Debug.LogError("[DiceRollUI] No TextMeshProUGUI found on popup!");
+            }
         }
+        
+        Debug.Log($"[DiceRollUI] Stage 1: Popup spawned at dice result area - Skill {skillIndex}: ×{multiplier:F1} (Dice: {dice1} + {dice2})");
+        
+        // Stage 2: After delay, move popup to skill slot position with Y+40 offset
+        DOVirtual.DelayedCall(popupDurationAtDiceResult, () =>
+        {
+            if (popup != null)
+            {
+                Transform skillSlotPos = GetPopupSpawnPosition(skillIndex);
+                Vector3 targetPosition = skillSlotPos.position;
+                targetPosition.y += 40f;
+                
+                // Move popup to skill slot position
+                popup.transform.DOMove(targetPosition, 0.5f).SetEase(Ease.OutQuad);
+                
+                Debug.Log($"[DiceRollUI] Stage 2: Popup moving to skill slot {skillIndex} position");
+            }
+        });
     }
     
     /// <summary>

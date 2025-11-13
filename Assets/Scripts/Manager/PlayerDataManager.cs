@@ -35,6 +35,8 @@ public class PlayerDataManager : MonoBehaviour
 
     [Header("Runtime State")]
     [SerializeField] private bool isGameOver = false;
+    [SerializeField] private int totalKills = 0;
+    [SerializeField] private float playTime = 0f;
 
     // Events for UI updates
     public event Action<int> OnChipsChanged; // New chip amount
@@ -63,6 +65,15 @@ public class PlayerDataManager : MonoBehaviour
     {
         // Initialize with starting chips
         ResetChips();
+    }
+
+    void Update()
+    {
+        // Track play time while game is active
+        if (!isGameOver)
+        {
+            playTime += Time.deltaTime;
+        }
     }
 
     void OnDestroy()
@@ -139,6 +150,8 @@ public class PlayerDataManager : MonoBehaviour
     {
         currentChips = startingChips;
         isGameOver = false;
+        totalKills = 0;
+        playTime = 0f;
         OnChipsChanged?.Invoke(currentChips);
         OnGameReset?.Invoke();
 
@@ -184,6 +197,32 @@ public class PlayerDataManager : MonoBehaviour
     public void RewardEnemyKilled(int chipReward)
     {
         AddChips(chipReward);
+    }
+
+    // ====== STATS TRACKING ======
+
+    /// <summary>
+    /// Increment kill counter.
+    /// </summary>
+    public void IncrementKills()
+    {
+        totalKills++;
+    }
+
+    /// <summary>
+    /// Get total enemies killed this run.
+    /// </summary>
+    public int GetTotalKills()
+    {
+        return totalKills;
+    }
+
+    /// <summary>
+    /// Get total play time in seconds.
+    /// </summary>
+    public float GetPlayTime()
+    {
+        return playTime;
     }
 
     // ====== DEBUG/EDITOR ======

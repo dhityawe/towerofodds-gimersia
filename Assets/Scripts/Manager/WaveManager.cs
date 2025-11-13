@@ -52,6 +52,8 @@ namespace TowerOfOdds.Manager
         [SerializeField] private WaveData currentWaveData;
         [SerializeField] private float waveTimer;
         [SerializeField] private bool waveActive = false;
+        [SerializeField] private int activeEnemyCount = 0;
+        [SerializeField] private bool allEnemiesSpawned = false;
 
         [Header("Scaling Parameters")]
         [SerializeField] private float baseDuration = 20f;           // Starting at 20 seconds
@@ -89,8 +91,17 @@ namespace TowerOfOdds.Manager
             {
                 waveTimer += Time.deltaTime;
 
-                if (waveTimer >= currentWaveData.duration)
+                // Check if wave should end: all enemies spawned AND all enemies defeated
+                if (allEnemiesSpawned && activeEnemyCount <= 0)
                 {
+                    Debug.Log($"[WaveManager] All enemies defeated! Ending wave.");
+                    EndWave();
+                }
+                
+                // Safety: Also end wave if duration exceeded (fallback)
+                if (waveTimer >= currentWaveData.duration * 2f)
+                {
+                    Debug.LogWarning($"[WaveManager] Wave duration exceeded! Force ending wave.");
                     EndWave();
                 }
             }
@@ -114,6 +125,8 @@ namespace TowerOfOdds.Manager
             currentWaveData = GenerateWaveData(currentWave);
             waveTimer = 0f;
             waveActive = true;
+            activeEnemyCount = 0;
+            allEnemiesSpawned = false;
 
             Debug.Log($"=== WAVE {currentWave} START ===");
             Debug.Log($"Duration: {currentWaveData.duration}s");
@@ -192,6 +205,40 @@ namespace TowerOfOdds.Manager
             }
 
             return new EnemyDistribution(melee, ranged, tank);
+        }
+
+        /// <summary>
+        /// Call this when an enemy spawns.
+        /// </summary>
+        public void OnEnemySpawned()
+        {
+            activeEnemyCount++;
+            Debug.Log($"[WaveManager] Enemy spawned. Active: {activeEnemyCount}");
+        }
+
+        /// <summary>
+        /// Call this when an enemy dies.
+        /// </summary>
+        public void OnEnemyDied()
+        {
+            activeEnemyCount--;
+            Debug.Log($"[WaveManager] Enemy died. Active: {activeEnemyCount}");
+            
+            // Check if wave is complete
+            if (allEnemiesSpawned && activeEnemyCount <= 0 && waveActive)
+            {
+                Debug.Log($"[WaveManager] All enemies defeated! Ending wave.");
+                EndWave();
+            }
+        }
+
+        /// <summary>
+        /// Call this when all enemies have finished spawning.
+        /// </summary>
+        public void OnAllEnemiesSpawned()
+        {
+            allEnemiesSpawned = true;
+            Debug.Log($"[WaveManager] All enemies spawned. Active: {activeEnemyCount}");
         }
 
         public void StopWaves()

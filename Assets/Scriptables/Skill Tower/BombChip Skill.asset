@@ -17,7 +17,12 @@ MonoBehaviour:
   icon: {fileID: 0}
   cost: 100
   rarity: 0
-  baseDamage: 20
+  baseDamage: 25
+  hitSound: {fileID: 0}
+  hitSoundVolume: 1
+  maxLevel: 5
+  damageIncreasePerLevel: 10
+  currentLevel: 1
   attackRange: 15
   bombChipPrefab: {fileID: 5393482838239930523, guid: 508b42859cf12ff439054180b5020441, type: 3}
   projectileSpeed: 6

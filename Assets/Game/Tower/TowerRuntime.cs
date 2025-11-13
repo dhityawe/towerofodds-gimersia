@@ -9,6 +9,7 @@ using UnityEngine;
 public class TowerRuntime : MonoBehaviour
 {
     public const int MAX_SKILL_SLOTS = 3;
+    public const int MAX_ITEM_SLOTS = 10; // Adjust as needed
 
     [Header("Base Stats (Editable)")]
     [SerializeField, Min(1f)] private float baseHp = 100f;
@@ -20,14 +21,19 @@ public class TowerRuntime : MonoBehaviour
     [Header("Skill Slots (Max 3)")]
     [SerializeField] private TowerSkill[] skillSlots = new TowerSkill[MAX_SKILL_SLOTS];
 
+    [Header("Item Slots")]
+    [SerializeField] private TowerItem[] itemSlots = new TowerItem[MAX_ITEM_SLOTS];
+
     [Header("Runtime State (Read-Only)")]
     [SerializeField] private float currentHp;
     [SerializeField] private bool isDead;
 
-    // Expose death event so other systems can subscribe without direct access to fields
+    // Events
     public event Action OnDeath;
     public event Action<int, TowerSkill> OnSkillEquipped; // slotIndex, skill
     public event Action<int> OnSkillUnequipped; // slotIndex
+    public event Action<int, TowerItem> OnItemAdded; // slotIndex, item
+    public event Action<int> OnItemRemoved; // slotIndex
 
     private float attackTimer;
     private TowerBase.Stats currentStats;
@@ -407,6 +413,65 @@ public class TowerRuntime : MonoBehaviour
             if (skillSlots[i] == null) return i;
         }
         return -1;
+    }
+
+    // ====== Item Management ======
+
+    /// <summary>Add an item to the tower's inventory.</summary>
+    public bool AddItem(TowerItem item)
+    {
+        if (item == null) return false;
+
+        // Find first empty slot
+        for (int i = 0; i < MAX_ITEM_SLOTS; i++)
+        {
+            if (itemSlots[i] == null)
+            {
+                itemSlots[i] = item;
+                item.ApplyEffect(this);
+                OnItemAdded?.Invoke(i, item);
+                Debug.Log($"[TowerRuntime] Item added to slot {i}: {item.GetName()}");
+                return true;
+            }
+        }
+
+        Debug.LogWarning("[TowerRuntime] No empty item slots available!");
+        return false;
+    }
+
+    /// <summary>Remove an item from a specific slot.</summary>
+    public bool RemoveItem(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= MAX_ITEM_SLOTS) return false;
+        if (itemSlots[slotIndex] == null) return false;
+
+        var item = itemSlots[slotIndex];
+        item.RemoveEffect(this);
+        itemSlots[slotIndex] = null;
+        OnItemRemoved?.Invoke(slotIndex);
+        Debug.Log($"[TowerRuntime] Item removed from slot {slotIndex}: {item.GetName()}");
+        return true;
+    }
+
+    /// <summary>Get the item in a specific slot (can be null).</summary>
+    public TowerItem GetItem(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= MAX_ITEM_SLOTS) return null;
+        return itemSlots[slotIndex];
+    }
+
+    /// <summary>Get all equipped items.</summary>
+    public TowerItem[] GetAllItems() => itemSlots;
+
+    /// <summary>Get count of equipped items (non-null).</summary>
+    public int GetItemCount()
+    {
+        int count = 0;
+        for (int i = 0; i < MAX_ITEM_SLOTS; i++)
+        {
+            if (itemSlots[i] != null) count++;
+        }
+        return count;
     }
 
     // Optional gizmo for editor visualization
